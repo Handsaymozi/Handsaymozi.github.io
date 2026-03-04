@@ -312,10 +312,7 @@
                     <div class="diary-date">2026年3月2日 - 我的碎碎念</div>
                     <div class="diary-content">今天做了你爱吃的可乐鸡翅，可惜你不在身边，只能拍照片给你看。晚上和你视频，看到你的笑脸，所有的思念都有了归处。宝贝，不管多远，我都会等你回来。</div>
                 </div>
-            </div>
-            <button class="action-btn tips-btn" onclick="alert('新增日记：复制 <div class=\"diary-item\">...</div> 这段代码，修改日期和内容即可～')">添加新日记</button>
-        </div>
-
+                
         <!-- 小说连载内容区 -->
         <div class="content-box" id="novel">
             <h2 class="content-subtitle">📖 我们的专属小说</h2>
@@ -410,7 +407,7 @@
         // 3. 倒计时功能（修改这里的见面日期）
         function initCountdown() {
             // 见面日期格式：new Date(年, 月-1, 日) （月份从0开始，6月写5）
-            const MEET_DATE = new Date(2026, 5, 20); // 示例：2026年6月20日
+            const MEET_DATE = new Date(2026, 4, 20); // 示例：2026年6月20日
             
             // 计算倒计时
             function calculateCountdown() {
@@ -419,7 +416,7 @@
                 
                 // 见面日期已到
                 if (diffTime <= 0) {
-                    document.getElementById("countdown").innerText = "终于见面啦！🥳";
+                    document.getElementById("countdown").innerText = "小钱回家啦！🥳";
                     return;
                 }
                 
