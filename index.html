@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>香香和小钱的小网站🪐</title>
+    <title>我们的异地恋小星球 🪐</title>
     <style>
         :root {
             --primary: #ff85a2;
@@ -121,17 +121,17 @@
 
     <div id="app">
         <div class="header">
-            <h1 class="title">香香和小钱的小网站🪐</h1>
+            <h1 class="title">我们异地恋的小星球🪐</h1>
         </div>
 
         <div class="card-cd">
-            <p style="color: #999; font-size: 0.9rem;">距离小钱回家还有</p>
+            <p style="color: #999; font-size: 0.9rem;">距离下次拥抱还有</p>
             <div id="cd" class="time">计算中...</div>
         </div>
 
         <div class="tabs">
             <button class="t-btn active" onclick="tab('diary', this)">情侣日记</button>
-            <button class="t-btn" onclick="tab('novel', this)">香香的小说</button>
+            <button class="t-btn" onclick="tab('novel', this)">星海故事</button>
         </div>
 
         <div id="diary" class="box active"></div>
@@ -157,13 +157,13 @@
         // 💎 这里是你唯一需要修改的数据区
         // ==========================================
         const DB = {
-            pw: "1234",             // 1. 进入密码
+            pw: "821718",             // 1. 进入密码
             date: "2026/05/22",     // 2. 见面日期 (年/月/日)
 
             // 3. 小说列表：["标题", "内容"]
             // 提示：内容里可以直接按回车换行，不需要加任何代码
             novels: [
-                ["第一章：重回高中", `  “你也听说唱吗？”
+                ["第一章：重回高中", `　　“你也听说唱吗？”
 　　看着眼前两个女生惊喜的目光，余安一阵恍惚。
 　　“呃…听的！”他下意识回答。
 　　“那你平时……”左边女生话才出口，两人像被按了开关，齐刷刷转回身去。
@@ -201,13 +201,15 @@
 　　余安转头，透过窗户望着正在和杨妍说笑的浅念。
 　　“那我就先来找你了哦~(¯▽¯~)！”`],
 
-                ["第二章：未完待续", `我还没有写好啦(〃′o`)`]
+                ["第二章：还没准备好哦", `我已经加速写啦`],
+
+                ["第三章：未完待续", `我在加油！`]
             ],
 
             // 4. 日记列表：["日期", "标题", "内容"]
             diaries: [
-                ["2026.03.05", "日记用不了✋(≧ω≦)", "这个板块暂时不能用啦，我之后想办法解决！。"],
-                ["2026.03.04", "我们的小网站", "今天我们的小网站正式上线啦！希望宝宝会喜欢哟(つ≧▽≦)つ🎉"]
+                ["2026.03.05", "日记板块", "这个板块暂时用不了啦！我会加油升级的！"],
+                ["2026.03.04", "我们的小网站", "今天我们的专属小网站正式上线啦！希望宝宝会喜欢！"]
             ]
         };
         // ==========================================
