@@ -1,69 +1,245 @@
 <!DOCTYPE html>
-<meta charset="utf-8">
-<title>管理页面</title>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>❤️ 专属管理页</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+        }
+        body {
+            background: linear-gradient(120deg, #ffe6f2 0%, #fce4ec 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(220, 120, 180, 0.15);
+        }
+        /* 登录区域 */
+        #login {
+            text-align: center;
+            padding: 40px 20px;
+        }
+        #login h2 {
+            color: #e53e3e;
+            margin-bottom: 30px;
+            font-size: 24px;
+        }
+        #login input {
+            width: 80%;
+            max-width: 300px;
+            padding: 12px 15px;
+            border: 2px solid #f8bbd0;
+            border-radius: 50px;
+            font-size: 16px;
+            outline: none;
+            margin-bottom: 20px;
+        }
+        #login input:focus {
+            border-color: #ec407a;
+        }
+        /* 按钮通用样式 */
+        button {
+            background: linear-gradient(90deg, #ec407a, #e53e3e);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 5px;
+        }
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(236, 64, 122, 0.3);
+        }
+        /* 管理面板 */
+        #panel {
+            display: none;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #f8bbd0;
+        }
+        .section h2 {
+            color: #d81b60;
+            margin-bottom: 15px;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+        }
+        .section h2::before {
+            content: "";
+            display: inline-block;
+            width: 8px;
+            height: 20px;
+            background: #ec407a;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #f0f0f0;
+            border-radius: 10px;
+            font-size: 16px;
+            margin-bottom: 15px;
+            outline: none;
+            resize: vertical;
+        }
+        input:focus, textarea:focus {
+            border-color: #ec407a;
+            box-shadow: 0 0 0 2px rgba(236, 64, 122, 0.1);
+        }
+        textarea {
+            min-height: 120px;
+            line-height: 1.6;
+        }
+        .btn-group {
+            text-align: center;
+            margin-top: 20px;
+        }
+        /* 手机适配 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px 15px;
+                border-radius: 15px;
+            }
+            button {
+                width: 100%;
+                margin: 8px 0;
+            }
+            .section h2 {
+                font-size: 18px;
+            }
+            input, textarea {
+                font-size: 15px;
+                padding: 10px 12px;
+            }
+        }
+    </style>
+</head>
 <body>
-<div id="login">
-  密码：<input type=password id=pwd>
-  <button onclick=login()>登录</button>
-</div>
+    <div class="container">
+        <!-- 登录区域 -->
+        <div id="login">
+            <h2>❤️ 专属管理后台</h2>
+            <input type="password" id="pwd" placeholder="请输入管理密码">
+            <br>
+            <button onclick="login()">登录</button>
+        </div>
 
-<div id=panel style="display:none">
-  <h2>日记</h2>
-  <textarea id="diary" style="width:100%;height:120px"></textarea>
+        <!-- 管理面板 -->
+        <div id="panel">
+            <!-- 日记区域 -->
+            <div class="section">
+                <h2>📝 我的日记</h2>
+                <textarea id="diary" placeholder="在这里输入日记内容..."></textarea>
+                <button onclick="saveDiary()">💾 暂存日记</button>
+            </div>
 
-  <h2>小说章节</h2>
-  章节名：<input id=ntitle style="width:100%"><br>
-  内容：<textarea id=ncontent style="width:100%;height:120px"></textarea>
+            <!-- 小说章节区域 -->
+            <div class="section">
+                <h2>📖 小说章节</h2>
+                <input type="text" id="ntitle" placeholder="请输入章节名（如：第一章 初见）">
+                <textarea id="ncontent" placeholder="在这里输入章节内容..."></textarea>
+                <button onclick="addNovel()">➕ 添加章节</button>
+            </div>
 
-  <br><br>
-  <button onclick="saveDiary()">💾 保存日记</button>
-  <button onclick="addNovel()">📖 添加小说章节</button>
-  <button onclick="saveAll()">🚀 上传到网站</button>
-</div>
+            <!-- 上传按钮组 -->
+            <div class="btn-group">
+                <button onclick="saveAll()">🚀 导出并上传</button>
+            </div>
+        </div>
+    </div>
 
-<script>
-const PASSWORD = "123456"
-let data = { diary:"", novels:[] }
+    <script>
+        // 管理密码（可自行修改）
+        const PASSWORD = "123456";
+        // 存储内容数据
+        let data = { 
+            diary: "", 
+            novels: [] 
+        };
 
-function login(){
-  if(document.getElementById('pwd').value == PASSWORD){
-    document.getElementById('login').style.display='none'
-    document.getElementById('panel').style.display='block'
-    load()
-  }else{
-    alert('密码错误')
-  }
-}
+        // 登录验证
+        function login() {
+            const inputPwd = document.getElementById('pwd').value.trim();
+            if (inputPwd === PASSWORD) {
+                document.getElementById('login').style.display = 'none';
+                document.getElementById('panel').style.display = 'block';
+                loadData(); // 加载已有内容
+            } else {
+                alert('❌ 密码错误，请重新输入');
+                document.getElementById('pwd').value = "";
+            }
+        }
 
-function load(){
-  fetch('data.json').then(r=>r.json()).then(d=>{
-    data = d
-    document.getElementById('diary').value = data.diary
-  })
-}
+        // 加载已有数据
+        function loadData() {
+            fetch('data.json')
+                .then(res => res.json())
+                .then(d => {
+                    data = d;
+                    document.getElementById('diary').value = data.diary || "";
+                })
+                .catch(err => {
+                    alert('首次使用，初始化空白内容～');
+                });
+        }
 
-function saveDiary(){
-  data.diary = document.getElementById('diary').value
-  alert('日记已暂存')
-}
+        // 暂存日记
+        function saveDiary() {
+            data.diary = document.getElementById('diary').value.trim();
+            alert('✅ 日记已暂存！');
+        }
 
-function addNovel(){
-  const t = document.getElementById('ntitle').value
-  const c = document.getElementById('ncontent').value
-  if(!t||!c)return alert('请填章节名和内容')
-  data.novels.push({title:t, content:c})
-  document.getElementById('ntitle').value=''
-  document.getElementById('ncontent').value=''
-  alert('章节已添加')
-}
+        // 添加小说章节
+        function addNovel() {
+            const title = document.getElementById('ntitle').value.trim();
+            const content = document.getElementById('ncontent').value.trim();
+            
+            if (!title || !content) {
+                alert('⚠️ 章节名和内容都不能为空哦～');
+                return;
+            }
 
-function saveAll(){
-  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'})
-  const a = document.createElement('a')
-  a.href = URL.createObjectURL(blob)
-  a.download = 'data.json'
-  a.click()
-  alert('下载完成！请把 data.json 传到 GitHub 即可更新网站！')
-}
-</script>
+            data.novels.push({ title: title, content: content });
+            // 清空输入框
+            document.getElementById('ntitle').value = "";
+            document.getElementById('ncontent').value = "";
+            alert(`✅ 已添加章节：《${title}》`);
+        }
+
+        // 导出data.json文件（用于上传到GitHub）
+        function saveAll() {
+            const jsonStr = JSON.stringify(data, null, 2);
+            const blob = new Blob([jsonStr], { type: 'application/json;charset=utf-8' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'data.json';
+            a.click();
+            
+            alert('🎉 data.json已下载！\n请把这个文件上传到GitHub仓库，网站就会自动更新啦～');
+        }
+
+        // 回车登录
+        document.getElementById('pwd').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                login();
+            }
+        });
+    </script>
 </body>
+</html>
