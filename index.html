@@ -3,245 +3,238 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>❤️ 我们的小世界</title>
+    <title>我们的异地恋小星球 💌</title>
     <style>
-        /* 全局样式 */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: "Microsoft YaHei", "PingFang SC", "SimHei", sans-serif;
+            font-family: "微软雅黑", "PingFang SC", sans-serif;
         }
         body {
-            background: linear-gradient(180deg, #fff5f7 0%, #ffe6f2 100%);
-            min-height: 100vh;
+            background: #fdf2f8;
             color: #333;
             padding: 20px;
-            line-height: 1.8;
-        }
-        /* 容器 */
-        .container {
             max-width: 800px;
             margin: 0 auto;
-            background: #fff;
-            border-radius: 24px;
-            padding: 30px;
-            box-shadow: 0 10px 40px rgba(220, 120, 180, 0.1);
         }
-        /* 顶部标题 */
-        .header {
-            text-align: center;
-            padding: 20px 0;
-            border-bottom: 2px solid #f8bbd0;
-            margin-bottom: 30px;
-        }
-        .header h1 {
-            color: #d81b60;
-            font-size: 32px;
-            margin-bottom: 10px;
-            position: relative;
-            display: inline-block;
-        }
-        .header h1::after {
-            content: "";
-            display: block;
-            width: 80%;
-            height: 3px;
-            background: linear-gradient(90deg, #ec407a, #f8bbd0);
-            border-radius: 3px;
-            margin: 8px auto 0;
-        }
-        .header p {
-            color: #7b1fa2;
-            font-size: 16px;
-            font-style: italic;
-        }
-        /* 通用分区样式 */
-        .section {
-            margin-bottom: 40px;
-        }
-        .section-title {
+        .password-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
             display: flex;
+            justify-content: center;
             align-items: center;
-            color: #e53e3e;
-            font-size: 24px;
-            margin-bottom: 20px;
-            padding-left: 10px;
-            border-left: 5px solid #ec407a;
+            z-index: 9999;
         }
-        .section-title i {
+        .password-input {
+            padding: 15px;
+            font-size: 18px;
+            border: none;
+            border-radius: 8px;
             margin-right: 10px;
-            font-size: 20px;
+            width: 250px;
         }
-        /* 日记样式 */
-        .diary-content {
-            background: #fef7fb;
-            padding: 25px;
-            border-radius: 16px;
-            border: 1px solid #fce4ec;
-            font-size: 17px;
-            color: #424242;
-            white-space: pre-wrap; /* 保留换行和空格 */
+        .password-btn {
+            padding: 15px 25px;
+            background: #e53e3e;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
         }
-        .diary-empty {
-            color: #9e9e9e;
+        h1 {
             text-align: center;
-            padding: 40px;
-            font-size: 16px;
+            color: #e53e3e;
+            margin: 20px 0;
+            font-size: 32px;
         }
-        /* 小说章节样式 */
-        .novel-list {
+        .countdown-box {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .countdown-title {
+            font-size: 20px;
+            color: #e53e3e;
+            margin-bottom: 10px;
+        }
+        .countdown-text {
+            font-size: 24px;
+            font-weight: bold;
+            color: #d69e2e;
+        }
+        .tabs {
             display: flex;
-            flex-direction: column;
-            gap: 20px;
+            justify-content: center;
+            margin: 20px 0;
+            gap: 10px;
+        }
+        .tab-btn {
+            padding: 12px 24px;
+            background: #fef7fb;
+            border: 2px solid #e53e3e;
+            border-radius: 8px;
+            color: #e53e3e;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .tab-btn.active {
+            background: #e53e3e;
+            color: white;
+        }
+        .content-box {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            display: none;
+        }
+        .content-box.active {
+            display: block;
+        }
+        .diary-content-page {
+            line-height: 1.8;
+            white-space: pre-wrap;
+            padding: 10px;
+            color: #4a5568;
         }
         .novel-chapter {
-            background: #faf0f5;
-            padding: 20px;
-            border-radius: 16px;
-            border: 1px solid #f8bbd0;
-            transition: transform 0.3s;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #f8bbd0;
         }
-        .novel-chapter:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 20px rgba(236, 64, 122, 0.1);
-        }
-        .chapter-title {
-            color: #c2185b;
+        .novel-title {
+            color: #e53e3e;
             font-size: 20px;
-            font-weight: bold;
             margin-bottom: 10px;
-            padding-bottom: 8px;
-            border-bottom: 1px dashed #f8bbd0;
         }
-        .chapter-content {
-            font-size: 16px;
-            color: #555;
+        .novel-content {
+            line-height: 1.8;
+            color: #2d3748;
+            text-indent: 2em;
             white-space: pre-wrap;
         }
-        .novel-empty {
-            color: #9e9e9e;
+        .empty-tip {
             text-align: center;
-            padding: 40px;
-            font-size: 16px;
-        }
-        /* 底部版权 */
-        .footer {
-            text-align: center;
-            margin-top: 50px;
-            padding-top: 20px;
-            border-top: 1px solid #fce4ec;
-            color: #bdbdbd;
-            font-size: 14px;
-        }
-        /* 手机适配 */
-        @media (max-width: 768px) {
-            .container {
-                padding: 20px 15px;
-                border-radius: 18px;
-            }
-            .header h1 {
-                font-size: 26px;
-            }
-            .section-title {
-                font-size: 20px;
-            }
-            .diary-content, .novel-chapter {
-                padding: 20px 15px;
-            }
-            .chapter-title {
-                font-size: 18px;
-            }
+            color: #999;
+            padding: 30px 0;
         }
     </style>
-    <!-- 引入图标（爱心/书本） -->
-    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <div class="container">
-        <!-- 顶部标题 -->
-        <div class="header">
-            <h1>我们的专属小美好</h1>
-            <p>把温柔和浪漫都藏在这里 ✨</p>
-        </div>
 
-        <!-- 日记区域 -->
-        <div class="section">
-            <div class="section-title">
-                <i class="fas fa-heart"></i> 甜蜜日记
-            </div>
-            <div id="diary-container">
-                <!-- 日记内容会自动加载 -->
-                <div class="diary-empty">💌 暂无日记，等待你的甜蜜记录...</div>
-            </div>
-        </div>
+<div class="password-modal" id="passwordModal">
+    <input type="password" class="password-input" id="passwordInput" placeholder="输入我们的专属密码">
+    <button class="password-btn" onclick="checkPassword()">进入星球</button>
+</div>
 
-        <!-- 小说区域 -->
-        <div class="section">
-            <div class="section-title">
-                <i class="fas fa-book"></i> 专属小说
-            </div>
-            <div id="novel-container">
-                <!-- 小说章节会自动加载 -->
-                <div class="novel-empty">📖 暂无小说章节，开始书写我们的故事吧...</div>
-            </div>
-        </div>
+<div id="mainContent" style="display: none;">
+    <h1>❤️ 我们的异地恋小星球 💛</h1>
 
-        <!-- 底部 -->
-        <div class="footer">
-            © 2026 我们的小世界 | 所有美好都值得被记录
-        </div>
+    <div class="countdown-box">
+        <div class="countdown-title">距离见面还有</div>
+        <div class="countdown-text" id="countdown">计算中...</div>
     </div>
 
-    <script>
-        // 加载数据并渲染页面
-        function loadContent() {
-            // 加载data.json文件
-            fetch('data.json')
-                .then(response => {
-                    if (!response.ok) throw new Error('暂无内容');
-                    return response.json();
-                })
-                .then(data => {
-                    // 渲染日记
-                    const diaryContainer = document.getElementById('diary-container');
-                    if (data.diary && data.diary.trim()) {
-                        diaryContainer.innerHTML = `<div class="diary-content">${data.diary}</div>`;
-                    } else {
-                        diaryContainer.innerHTML = `<div class="diary-empty">💌 暂无日记，等待你的甜蜜记录...</div>`;
-                    }
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('diary')">情侣日记</button>
+        <button class="tab-btn" onclick="switchTab('novel')">我们的小说</button>
+    </div>
 
-                    // 渲染小说章节
-                    const novelContainer = document.getElementById('novel-container');
-                    if (data.novels && data.novels.length > 0) {
-                        let novelHtml = '<div class="novel-list">';
-                        data.novels.forEach(chapter => {
-                            novelHtml += `
-                                <div class="novel-chapter">
-                                    <div class="chapter-title">${chapter.title}</div>
-                                    <div class="chapter-content">${chapter.content}</div>
-                                </div>
-                            `;
-                        });
-                        novelHtml += '</div>';
-                        novelContainer.innerHTML = novelHtml;
-                    } else {
-                        novelContainer.innerHTML = `<div class="novel-empty">📖 暂无小说章节，开始书写我们的故事吧...</div>`;
-                    }
-                })
-                .catch(error => {
-                    console.log(error);
-                    // 加载失败时显示默认提示
-                    document.getElementById('diary-container').innerHTML = `<div class="diary-empty">💌 暂无日记，等待你的甜蜜记录...</div>`;
-                    document.getElementById('novel-container').innerHTML = `<div class="novel-empty">📖 暂无小说章节，开始书写我们的故事吧...</div>`;
-                });
+    <div class="content-box active" id="diary">
+        <h2 style="color:#e53e3e; margin-bottom:15px;">💌 情侣日记</h2>
+        <div id="diaryRender"></div>
+    </div>
+
+    <div class="content-box" id="novel">
+        <h2 style="color:#e53e3e; margin-bottom:15px;">📖 我们的专属小说</h2>
+        <div id="novelRender"></div>
+    </div>
+</div>
+
+<script>
+    const LOVE_PASSWORD = "1314520";
+
+    function checkPassword() {
+        const input = document.getElementById("passwordInput").value;
+        if (input === LOVE_PASSWORD) {
+            document.getElementById("passwordModal").style.display = "none";
+            document.getElementById("mainContent").style.display = "block";
+            loadData();
+            initCountdown();
+        } else {
+            alert("密码不对哦～只有我们俩能进❤️");
         }
+    }
 
-        // 页面加载完成后执行
-        window.onload = loadContent;
+    function switchTab(tabName) {
+        document.querySelectorAll('.content-box').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        document.getElementById(tabName).classList.add('active');
+        event.target.classList.add('active');
+    }
 
-        // 自动刷新（可选，每5分钟刷新一次内容）
-        setInterval(loadContent, 300000);
-    </script>
+    // 从 data.json 加载内容
+    function loadData() {
+        fetch('data.json')
+            .then(res => res.json())
+            .then(data => {
+                // 渲染日记
+                const diaryEl = document.getElementById('diaryRender');
+                if (data.diary && data.diary.trim()) {
+                    diaryEl.innerHTML = `<div class="diary-content-page">${data.diary}</div>`;
+                } else {
+                    diaryEl.innerHTML = '<div class="empty-tip">快来写下第一篇日记吧～</div>';
+                }
+
+                // 渲染小说
+                const novelEl = document.getElementById('novelRender');
+                if (data.novels && data.novels.length > 0) {
+                    let html = '';
+                    data.novels.forEach(ch => {
+                        html += `
+                        <div class="novel-chapter">
+                            <div class="novel-title">${ch.title}</div>
+                            <div class="novel-content">${ch.content}</div>
+                        </div>`;
+                    });
+                    novelEl.innerHTML = html;
+                } else {
+                    novelEl.innerHTML = '<div class="empty-tip">快来写我们的故事第一章吧～</div>';
+                }
+            })
+            .catch(() => {
+                document.getElementById('diaryRender').innerHTML = '<div class="empty-tip">暂无日记</div>';
+                document.getElementById('novelRender').innerHTML = '<div class="empty-tip">暂无小说</div>';
+            });
+    }
+
+    function initCountdown() {
+        const meetDate = new Date(2026, 5, 20);
+        function calc() {
+            const now = new Date();
+            const diff = meetDate - now;
+            if (diff <= 0) {
+                document.getElementById("countdown").innerText = "终于见面啦！🥳";
+                return;
+            }
+            const d = Math.floor(diff / 86400000);
+            const h = Math.floor((diff % 86400000) / 3600000);
+            document.getElementById("countdown").innerText = d + " 天 " + h + " 小时";
+        }
+        calc();
+        setInterval(calc, 60000);
+    }
+</script>
 </body>
 </html>
