@@ -6,9 +6,9 @@
     <title>我们的异地恋小星球 🪐</title>
     <style>
         :root {
-            --primary-pink: #ff85a2;
-            --deep-purple: #6b5b95;
-            --glass: rgba(255, 255, 255, 0.75);
+            --primary: #ff85a2;
+            --accent: #6b5b95;
+            --glass: rgba(255, 255, 255, 0.8);
             --shadow: 0 8px 32px rgba(31, 38, 135, 0.1);
         }
 
@@ -16,210 +16,232 @@
         
         body {
             background: radial-gradient(circle at top, #fff5f7, #e6e9f0);
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            color: #444;
             min-height: 100vh;
-            line-height: 1.6;
+            font-family: -apple-system, sans-serif;
+            color: #444;
+            overflow-x: hidden;
         }
 
         /* 密码锁 */
-        #passwordModal {
-            position: fixed; inset: 0; background: rgba(255,255,255,0.8);
+        #lock {
+            position: fixed; inset: 0; background: var(--glass);
             backdrop-filter: blur(20px); z-index: 9999;
-            display: flex; justify-content: center; align-items: center; transition: 0.5s;
+            display: flex; justify-content: center; align-items: center;
         }
-        .pw-box { background: white; padding: 40px; border-radius: 25px; box-shadow: var(--shadow); text-align: center; width: 85%; max-width: 350px; }
-        .pw-input { width: 100%; padding: 12px; margin: 20px 0; border: 2px solid #eee; border-radius: 12px; text-align: center; font-size: 18px; outline: none; }
-        .pw-btn { background: var(--primary-pink); color: white; border: none; padding: 12px 30px; border-radius: 25px; cursor: pointer; font-weight: bold; }
+        .lock-card { background: white; padding: 40px; border-radius: 30px; box-shadow: var(--shadow); text-align: center; width: 85%; max-width: 350px; }
+        .in { width: 100%; padding: 15px; margin: 20px 0; border: 2px solid #eee; border-radius: 15px; text-align: center; font-size: 18px; outline: none; }
+        .btn { background: var(--primary); color: white; border: none; padding: 15px 40px; border-radius: 50px; cursor: pointer; font-weight: bold; width: 100%; }
 
-        /* 主容器 */
-        #mainContent { max-width: 900px; margin: 0 auto; padding: 20px; display: none; }
-        .main-title { text-align: center; font-size: 1.8rem; margin: 20px 0; background: linear-gradient(45deg, var(--deep-purple), var(--primary-pink)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        /* 主界面 */
+        #app { max-width: 900px; margin: 0 auto; padding: 20px; display: none; }
+        .header { text-align: center; margin: 20px 0 30px; }
+        .title { font-size: 1.8rem; background: linear-gradient(45deg, var(--accent), var(--primary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
-        /* 倒计时 */
-        .countdown-card {
+        /* 倒计时卡片 */
+        .card-cd {
             background: var(--glass); backdrop-filter: blur(10px);
-            padding: 20px; border-radius: 20px; text-align: center;
-            border: 1px solid white; box-shadow: var(--shadow); margin-bottom: 25px;
+            padding: 25px; border-radius: 25px; text-align: center;
+            border: 1px solid white; box-shadow: var(--shadow); margin-bottom: 30px;
         }
-        .countdown-time { font-size: 1.5rem; font-weight: bold; color: var(--deep-purple); margin-top: 5px; }
+        .time { font-size: 1.6rem; font-weight: 800; color: var(--accent); margin-top: 10px; }
 
         /* 选项卡 */
-        .tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 25px; }
-        .tab-btn { padding: 10px 25px; border-radius: 20px; border: none; background: white; cursor: pointer; transition: 0.3s; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .tab-btn.active { background: var(--deep-purple); color: white; }
+        .tabs { display: flex; justify-content: center; gap: 15px; margin-bottom: 30px; }
+        .t-btn { padding: 12px 30px; border-radius: 50px; border: none; background: white; color: var(--accent); cursor: pointer; transition: 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .t-btn.active { background: var(--accent); color: white; }
 
-        /* 内容区 */
-        .content-box { display: none; animation: fadeIn 0.5s ease; }
-        .content-box.active { display: block; }
+        /* 内容容器 */
+        .box { display: none; animation: fadeIn 0.6s ease; }
+        .box.active { display: block; }
 
-        /* 小说布局 - 核心修改 */
-        .novel-container {
-            display: flex; gap: 20px; height: 65vh; position: relative;
-        }
-
-        /* 目录侧边栏 (PC端) */
-        .chapter-sidebar {
-            width: 260px; background: var(--glass); border-radius: 20px;
+        /* 小说板块布局 */
+        .novel-wrap { display: flex; gap: 20px; height: 65vh; position: relative; }
+        
+        .side {
+            width: 250px; background: rgba(255,255,255,0.5); border-radius: 20px;
             padding: 15px; overflow-y: auto; border: 1px solid white;
         }
-
-        /* 阅读区 */
-        .reader-area {
+        
+        .reader {
             flex: 1; background: white; border-radius: 20px;
-            padding: 25px; overflow-y: auto; position: relative;
-            box-shadow: var(--shadow);
+            padding: 30px; overflow-y: auto; box-shadow: var(--shadow);
+            position: relative;
         }
-        .chapter-card {
-            padding: 12px 15px; margin-bottom: 8px; border-radius: 10px;
-            cursor: pointer; transition: 0.2s; font-size: 0.9rem;
-            background: rgba(255,255,255,0.5);
-        }
-        .chapter-card:hover, .chapter-card.active { background: var(--primary-pink); color: white; }
 
-        /* 手机端适配逻辑 */
+        .ch-card {
+            padding: 15px; margin-bottom: 10px; border-radius: 12px;
+            cursor: pointer; background: white; font-size: 0.9rem; transition: 0.2s;
+        }
+        .ch-card.active { background: var(--primary); color: white; transform: translateX(5px); }
+
+        /* 日记板块 */
+        .diary-card {
+            background: white; padding: 25px; border-radius: 20px;
+            margin-bottom: 20px; box-shadow: var(--shadow);
+        }
+
+        /* 手机端浮动菜单 */
+        .fab {
+            display: none; position: fixed; right: 25px; bottom: 30px;
+            width: 60px; height: 60px; background: var(--primary);
+            color: white; border-radius: 50%; justify-content: center; align-items: center;
+            box-shadow: 0 8px 20px rgba(255,133,162,0.4); z-index: 1001; font-size: 24px; border: none;
+        }
+
+        /* 手机端适配 */
         @media (max-width: 768px) {
-            .novel-container { height: 70vh; }
-            .chapter-sidebar {
+            .novel-wrap { height: 75vh; }
+            .side {
                 position: fixed; bottom: -80vh; left: 0; width: 100%; height: 70vh;
-                z-index: 2000; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-                border-radius: 25px 25px 0 0; background: white; padding-top: 40px;
+                z-index: 2000; background: white; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                border-radius: 30px 30px 0 0; padding-top: 30px;
             }
-            .chapter-sidebar.open { bottom: 0; box-shadow: 0 -10px 30px rgba(0,0,0,0.1); }
-            
-            /* 手机端遮罩层 */
-            .sidebar-overlay {
+            .side.open { bottom: 0; box-shadow: 0 -10px 30px rgba(0,0,0,0.1); }
+            .fab { display: flex; }
+            .overlay {
                 position: fixed; inset: 0; background: rgba(0,0,0,0.3);
-                display: none; z-index: 1999; backdrop-filter: blur(3px);
+                display: none; z-index: 1999; backdrop-filter: blur(4px);
             }
-            .sidebar-overlay.show { display: block; }
-            
-            /* 手机端目录按钮 */
-            .menu-fab {
-                display: flex !important; position: fixed; right: 25px; bottom: 40px;
-                width: 56px; height: 56px; background: var(--primary-pink);
-                color: white; border-radius: 50%; justify-content: center; align-items: center;
-                box-shadow: 0 4px 15px rgba(255,133,162,0.5); z-index: 1000; border: none; font-size: 20px;
-            }
+            .overlay.active { display: block; }
         }
 
-        .menu-fab { display: none; }
-        .novel-content p { margin-bottom: 15px; text-indent: 2em; line-height: 1.8; color: #555; }
+        .novel-content p { margin-bottom: 18px; text-indent: 2em; line-height: 1.8; color: #555; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
-    <div id="passwordModal">
-        <div class="pw-box">
-            <h3>💫 输入小星球密钥</h3>
-            <input type="password" id="pw" class="pw-input" placeholder="输入我们的纪念日">
-            <button class="pw-btn" onclick="check()">解锁</button>
+    <div id="lock">
+        <div class="lock-card">
+            <h2 style="color: var(--accent)">💫 验证信号</h2>
+            <input type="password" id="pw" class="in" placeholder="输入专属暗号">
+            <button class="btn" onclick="unlock()">降落星球</button>
         </div>
     </div>
 
-    <div id="mainContent">
-        <h1 class="main-title">我们的异地恋小星球 🪐</h1>
+    <div id="app">
+        <div class="header">
+            <h1 class="title">我们的异地恋小星球 🪐</h1>
+        </div>
 
-        <div class="countdown-card">
-            <p style="color: #999; font-size: 0.9rem;">距离下次见面还有</p>
-            <div id="cd" class="countdown-time">计算中...</div>
+        <div class="card-cd">
+            <p style="color: #999; font-size: 0.9rem;">距离下次拥抱还有</p>
+            <div id="cd" class="time">计算中...</div>
         </div>
 
         <div class="tabs">
-            <button class="tab-btn active" onclick="tab('diary', this)">情侣日记</button>
-            <button class="tab-btn" onclick="tab('novel', this)">星海故事</button>
+            <button class="t-btn active" onclick="tab('diary', this)">情侣日记</button>
+            <button class="t-btn" onclick="tab('novel', this)">星海故事</button>
         </div>
 
-        <div id="diary" class="content-box active">
-            <div id="diaryList">
-                <div style="background:white; padding:20px; border-radius:15px; margin-bottom:15px; box-shadow: var(--shadow);">
-                    <p style="color:var(--primary-pink); font-weight:bold; font-size:0.8rem;">2026.03.04</p>
-                    <p style="margin-top:8px;">今天 GitHub 部署成功啦！希望你在那边看到这个网页能感到开心 ❤️</p>
-                </div>
-            </div>
-        </div>
+        <div id="diary" class="box active"></div>
 
-        <div id="novel" class="content-box">
-            <div class="novel-container">
-                <div class="sidebar-overlay" id="overlay" onclick="toggleMenu()"></div>
-                <div class="chapter-sidebar" id="sidebar">
-                    <h4 style="margin-bottom:15px; padding-left:10px;">章节目录</h4>
+        <div id="novel" class="box">
+            <div class="novel-wrap">
+                <div class="overlay" id="mask" onclick="menu()"></div>
+                <div class="side" id="side">
+                    <h3 style="margin: 0 0 15px 10px; color: var(--accent);">章节目录</h3>
                     <div id="clist"></div>
                 </div>
-                <div class="reader-area" id="reader">
-                    <h3 id="ctitle" style="color:var(--deep-purple); margin-bottom:20px;">请选择章节</h3>
+                <div class="reader" id="reader">
+                    <h2 id="ctitle" style="margin-bottom: 25px; color: var(--accent);"></h2>
                     <div id="ctext" class="novel-content"></div>
                 </div>
             </div>
-            <button class="menu-fab" onclick="toggleMenu()">📋</button>
+            <button class="fab" onclick="menu()">📋</button>
         </div>
     </div>
 
     <script>
-        // --- 1. 你唯一需要频繁修改的地方 ---
-        const CONFIG = {
-            pass: "821718", // 你的密码
-            meetDate: "2026/05/22 00:00:00" // 见面时间
+        // ==========================================
+        // 💎 这里是你唯一需要修改的数据区
+        // ==========================================
+        const DB = {
+            pw: "1314",             // 1. 进入密码
+            date: "2026/06/20",     // 2. 见面日期 (年/月/日)
+
+            // 3. 小说列表：["标题", "内容"]
+            // 提示：内容里可以直接按回车换行，不需要加任何代码
+            novels: [
+                ["第一章：相遇那天", `那是2024年的夏天，蝉鸣聒噪。
+                
+                你出现在图书馆的转角，阳光刚好洒在你的裙摆上。
+                那一刻我听到了自己心跳的声音。`],
+
+                ["第二章：异地的第一晚", `机场的告别很难，但你说没关系，距离会让心更近。
+                
+                回到家看着空荡荡的房间，我开始写这篇属于我们的故事。`],
+
+                ["第三章：未完待续", `我们还要一起走很久很久。
+                所有的等待，都是为了更好的重逢。`]
+            ],
+
+            // 4. 日记列表：["日期", "标题", "内容"]
+            diaries: [
+                ["2026.03.05", "星球降落", "今天我们的专属小星球正式上线啦！希望你会喜欢。"],
+                ["2026.03.04", "想你的碎碎念", "今天看到一朵云特别像你，忍不住拍了下来。"]
+            ]
         };
+        // ==========================================
 
-        const novelData = [
-            { title: "第一章：遇见你那天", content: "<p>那是2024年的初夏...</p><p>你穿着白裙子，闯进了我的世界。</p>" },
-            { title: "第二章：跨越千里的吻", content: "<p>视频里的你，总是那么可爱。</p><p>异地很苦，但有你就很甜。</p>" },
-            { title: "第三章：未完待续", content: "<p>我们要一起走下去，走很久很久。</p>" },
-            // 后续增加章节，直接在这里复制一行即可
-        ];
-
-        // --- 2. 核心逻辑 ---
-        function check() {
-            if(document.getElementById('pw').value === CONFIG.pass) {
-                document.getElementById('passwordModal').style.opacity = '0';
-                setTimeout(() => {
-                    document.getElementById('passwordModal').style.display = 'none';
-                    document.getElementById('mainContent').style.display = 'block';
-                    init();
-                }, 500);
-            } else { alert("不对哦～❤️"); }
+        function unlock() {
+            if(document.getElementById('pw').value === DB.pw) {
+                document.getElementById('lock').style.display = 'none';
+                document.getElementById('app').style.display = 'block';
+                start();
+            } else { alert("暗号不对哦～❤️"); }
         }
 
-        function init() {
-            // 初始化倒计时
+        function start() {
+            // 倒计时逻辑
             setInterval(() => {
-                const diff = new Date(CONFIG.meetDate) - new Date();
-                const d = Math.floor(diff/(1000*60*60*24)), h = Math.floor((diff/(1000*60*60))%24), m = Math.floor((diff/(1000*60))%60), s = Math.floor((diff/1000)%60);
+                const diff = new Date(DB.date) - new Date();
+                const d = Math.floor(diff/864e5), h = Math.floor(diff%864e5/36e5), m = Math.floor(diff%36e5/6e4), s = Math.floor(diff%6e4/1e3);
                 document.getElementById('cd').innerText = `${d}天 ${h}时 ${m}分 ${s}秒`;
             }, 1000);
 
-            // 初始化小说目录
+            // 渲染日记
+            document.getElementById('diary').innerHTML = DB.diaries.map(d => `
+                <div class="diary-card">
+                    <p style="color:var(--primary); font-weight:bold; font-size:0.8rem;">${d[0]}</p>
+                    <h3 style="margin:5px 0 10px;">${d[1]}</h3>
+                    <div style="color:#666;">${fmt(d[2])}</div>
+                </div>
+            `).join('');
+
+            // 渲染小说目录
             const clist = document.getElementById('clist');
-            novelData.forEach((ch, i) => {
+            DB.novels.forEach((n, i) => {
                 const div = document.createElement('div');
-                div.className = 'chapter-card';
-                div.innerText = ch.title;
+                div.className = 'ch-card';
+                div.innerText = n[0];
                 div.onclick = () => {
-                    document.getElementById('ctitle').innerText = ch.title;
-                    document.getElementById('ctext').innerHTML = ch.content;
-                    document.querySelectorAll('.chapter-card').forEach(c => c.classList.remove('active'));
+                    document.getElementById('ctitle').innerText = n[0];
+                    document.getElementById('ctext').innerHTML = fmt(n[1]);
+                    document.querySelectorAll('.ch-card').forEach(c => c.classList.remove('active'));
                     div.classList.add('active');
                     document.getElementById('reader').scrollTop = 0;
-                    if(window.innerWidth <= 768) toggleMenu(); // 手机端选完自动关目录
+                    if(window.innerWidth <= 768) menu(); 
                 };
                 clist.appendChild(div);
             });
-            // 默认加载第一章
-            clist.firstChild.click();
+            if(clist.firstChild) clist.firstChild.click();
         }
 
-        function tab(id, btn) {
-            document.querySelectorAll('.content-box').forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        // 自动换行工具
+        function fmt(t) {
+            return t.split('\n').filter(l => l.trim()).map(l => `<p>${l.trim()}</p>`).join('');
+        }
+
+        function tab(id, b) {
+            document.querySelectorAll('.box, .t-btn').forEach(e => e.classList.remove('active'));
             document.getElementById(id).classList.add('active');
-            btn.classList.add('active');
+            b.classList.add('active');
         }
 
-        function toggleMenu() {
-            document.getElementById('sidebar').classList.toggle('open');
-            document.getElementById('overlay').classList.toggle('show');
+        function menu() {
+            document.getElementById('side').classList.toggle('open');
+            document.getElementById('mask').classList.toggle('active');
         }
     </script>
 </body>
