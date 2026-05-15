@@ -1,278 +1,1123 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>我们的异地恋小星球 🪐</title>
-    <style>
-        :root {
-            --primary: #ff85a2;
-            --accent: #6b5b95;
-            --glass: rgba(255, 255, 255, 0.8);
-            --shadow: 0 8px 32px rgba(31, 38, 135, 0.1);
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>我和小钱 ❤️</title>
+<style>
+/* ===== CSS Variables ===== */
+:root {
+  --pink: #FF9AA2;
+  --pink-light: #FFB7B2;
+  --peach: #FFDAC1;
+  --mint: #B5EAD7;
+  --lavender: #C7CEEA;
+  --lavender-light: #E2E4F0;
+  --white: #FFF5F5;
+  --text: #5D4E5F;
+  --text-light: #8B7D8E;
+  --shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  --radius: 24px;
+  --glass-bg: rgba(255, 255, 255, 0.45);
+  --glass-border: rgba(255, 255, 255, 0.5);
+  --transition: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-top: env(safe-area-inset-top, 0px);
+}
 
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        
-        body {
-            background: radial-gradient(circle at top, #fff5f7, #e6e9f0);
-            min-height: 100vh;
-            font-family: -apple-system, sans-serif;
-            color: #444;
-            overflow-x: hidden;
-        }
+/* ===== Reset & Base ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        /* 密码锁 */
-        #lock {
-            position: fixed; inset: 0; background: var(--glass);
-            backdrop-filter: blur(20px); z-index: 9999;
-            display: flex; justify-content: center; align-items: center;
-        }
-        .lock-card { background: white; padding: 40px; border-radius: 30px; box-shadow: var(--shadow); text-align: center; width: 85%; max-width: 350px; }
-        .in { width: 100%; padding: 15px; margin: 20px 0; border: 2px solid #eee; border-radius: 15px; text-align: center; font-size: 18px; outline: none; }
-        .btn { background: var(--primary); color: white; border: none; padding: 15px 40px; border-radius: 50px; cursor: pointer; font-weight: bold; width: 100%; }
+body {
+  font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", system-ui, -apple-system, sans-serif;
+  background: linear-gradient(135deg, #FFE8EC 0%, #F8E8F0 25%, #E8E8F8 50%, #E8F0F8 75%, #FFE8EC 100%);
+  background-attachment: fixed;
+  background-size: 400% 400%;
+  animation: bgShift 20s ease infinite;
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
+  color: var(--text);
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-font-smoothing: antialiased;
+  -webkit-overflow-scrolling: touch;
+  user-select: none;
+  -webkit-user-select: none;
+}
 
-        /* 主界面 */
-        #app { max-width: 900px; margin: 0 auto; padding: 20px; display: none; }
-        .header { text-align: center; margin: 20px 0 30px; }
-        .title { font-size: 1.8rem; background: linear-gradient(45deg, var(--accent), var(--primary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+@keyframes bgShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
 
-        /* 倒计时卡片 */
-        .card-cd {
-            background: var(--glass); backdrop-filter: blur(10px);
-            padding: 25px; border-radius: 25px; text-align: center;
-            border: 1px solid white; box-shadow: var(--shadow); margin-bottom: 30px;
-        }
-        .time { font-size: 1.6rem; font-weight: 800; color: var(--accent); margin-top: 10px; }
+/* ===== Floating Decorations ===== */
+.floating-decorations {
+  position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden;
+}
+.deco {
+  position: absolute;
+  font-size: 28px;
+  opacity: 0.3;
+  animation: floatUp 8s ease-in infinite;
+}
+@keyframes floatUp {
+  0% { transform: translateY(105vh) rotate(0deg) scale(0); opacity: 0; }
+  10% { opacity: 0.3; }
+  90% { opacity: 0.3; }
+  100% { transform: translateY(-10vh) rotate(360deg) scale(1.2); opacity: 0; }
+}
 
-        /* 选项卡 */
-        .tabs { display: flex; justify-content: center; gap: 15px; margin-bottom: 30px; }
-        .t-btn { padding: 12px 30px; border-radius: 50px; border: none; background: white; color: var(--accent); cursor: pointer; transition: 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        .t-btn.active { background: var(--accent); color: white; }
+/* ===== Password Overlay ===== */
+.password-overlay {
+  position: fixed; inset: 0; z-index: 1000;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, #FFE4E8 0%, #F3E0F8 40%, #E0E4F8 100%);
+  transition: opacity 0.6s ease, visibility 0.6s ease;
+  padding: 20px;
+}
+.password-overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+.password-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1.5px solid var(--glass-border);
+  border-radius: var(--radius);
+  padding: 48px 36px 36px;
+  text-align: center;
+  box-shadow: var(--shadow);
+  max-width: 380px; width: 100%;
+  position: relative; z-index: 1;
+}
+.password-card .lock-icon { font-size: 64px; margin-bottom: 12px; animation: lockBounce 2s ease-in-out infinite; }
+@keyframes lockBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+.password-card h1 { font-size: 22px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+.password-card p { font-size: 14px; color: var(--text-light); margin-bottom: 24px; }
+.password-card input {
+  width: 100%; padding: 14px 20px;
+  border: 1.5px solid rgba(255, 154, 162, 0.3);
+  border-radius: 50px;
+  background: rgba(255, 255, 255, 0.6);
+  font-size: 16px; text-align: center;
+  color: var(--text); outline: none;
+  transition: var(--transition);
+  letter-spacing: 4px;
+  -webkit-appearance: none;
+}
+.password-card input:focus { border-color: var(--pink); box-shadow: 0 0 0 4px rgba(255, 154, 162, 0.15); }
+.password-card input::placeholder { color: #d0c4d0; letter-spacing: 2px; }
+.password-card button {
+  margin-top: 16px; width: 100%; padding: 14px;
+  border: none; border-radius: 50px;
+  background: linear-gradient(135deg, var(--pink), var(--pink-light));
+  color: #fff; font-size: 16px; font-weight: 600;
+  cursor: pointer; letter-spacing: 2px;
+  transition: var(--transition);
+  box-shadow: 0 4px 16px rgba(255, 154, 162, 0.3);
+  -webkit-appearance: none;
+}
+.password-card button:active { transform: scale(0.97); }
+.password-error { color: #e88; font-size: 13px; margin-top: 10px; min-height: 18px; }
+.password-card.shake { animation: shake 0.5s ease; }
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-8px); }
+  40% { transform: translateX(8px); }
+  60% { transform: translateX(-6px); }
+  80% { transform: translateX(6px); }
+}
 
-        /* 内容容器 */
-        .box { display: none; animation: fadeIn 0.6s ease; }
-        .box.active { display: block; }
+/* ===== Main App ===== */
+.app-container {
+  position: relative; z-index: 1;
+  max-width: 900px; margin: 0 auto;
+  padding: calc(12px + var(--safe-top)) 16px calc(100px + var(--safe-bottom));
+}
+.hidden-page { display: none !important; }
+.page { animation: pageIn 0.35s ease; }
+@keyframes pageIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 
-        /* 小说板块布局 */
-        .novel-wrap { display: flex; gap: 20px; height: 65vh; position: relative; }
-        
-        .side {
-            width: 250px; background: rgba(255,255,255,0.5); border-radius: 20px;
-            padding: 15px; overflow-y: auto; border: 1px solid white;
-        }
-        
-        .reader {
-            flex: 1; background: white; border-radius: 20px;
-            padding: 30px; overflow-y: auto; box-shadow: var(--shadow);
-            position: relative;
-        }
+/* ===== Top Bar ===== */
+.top-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 4px;
+  position: relative; z-index: 2;
+}
+.top-bar .logo { font-size: 20px; font-weight: 700; color: var(--text); }
+.top-bar .logout-btn {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: 50px;
+  padding: 10px 20px; font-size: 14px; color: var(--text-light);
+  cursor: pointer; transition: var(--transition);
+  -webkit-tap-highlight-color: transparent;
+}
+.top-bar .logout-btn:active { color: var(--pink); background: rgba(255,255,255,0.6); }
 
-        .ch-card {
-            padding: 15px; margin-bottom: 10px; border-radius: 12px;
-            cursor: pointer; background: white; font-size: 0.9rem; transition: 0.2s;
-        }
-        .ch-card.active { background: var(--primary); color: white; transform: translateX(5px); }
+/* ===== Tab Navigation ===== */
+.tab-nav {
+  display: flex; gap: 12px; margin-bottom: 24px;
+  padding: 6px; background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  border-radius: 50px;
+  position: relative; z-index: 2;
+}
+.tab-btn {
+  flex: 1; padding: 12px 20px; border: none; border-radius: 50px;
+  background: transparent; font-size: 15px; font-weight: 500;
+  color: var(--text-light); cursor: pointer; transition: var(--transition);
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+  min-height: 44px;
+}
+.tab-btn.active {
+  background: linear-gradient(135deg, var(--pink), var(--pink-light));
+  color: #fff; font-weight: 600;
+  box-shadow: 0 4px 16px rgba(255, 154, 162, 0.25);
+}
 
-        /* 日记板块 */
-        .diary-card {
-            background: white; padding: 25px; border-radius: 20px;
-            margin-bottom: 20px; box-shadow: var(--shadow);
-        }
+/* ===== Home Page ===== */
+.home-page { display: flex; flex-direction: column; gap: 20px; }
+.anniversary-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1.5px solid var(--glass-border);
+  border-radius: var(--radius);
+  padding: 36px 28px;
+  text-align: center;
+  box-shadow: var(--shadow);
+}
+.anniversary-card .heart-icon { font-size: 48px; margin-bottom: 8px; }
+.anniversary-card h2 { font-size: 16px; font-weight: 500; color: var(--text-light); margin-bottom: 4px; }
+.anniversary-card .days-count {
+  font-size: 56px; font-weight: 700;
+  background: linear-gradient(135deg, var(--pink), #E8A0B0);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1.2;
+}
+.anniversary-card .days-label { font-size: 14px; color: var(--text-light); margin-top: 4px; }
+.anniversary-card .date-info { font-size: 13px; color: var(--text-light); margin-top: 12px; opacity: 0.7; }
 
-        /* 手机端浮动菜单 */
-        .fab {
-            display: none; position: fixed; right: 25px; bottom: 30px;
-            width: 60px; height: 60px; background: var(--primary);
-            color: white; border-radius: 50%; justify-content: center; align-items: center;
-            box-shadow: 0 8px 20px rgba(255,133,162,0.4); z-index: 1001; font-size: 24px; border: none;
-        }
+.feature-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.feature-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1.5px solid var(--glass-border);
+  border-radius: var(--radius);
+  padding: 28px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: var(--transition);
+  box-shadow: var(--shadow);
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  -webkit-tap-highlight-color: transparent;
+  min-height: 130px; justify-content: center;
+}
+.feature-card:active { transform: scale(0.97); background: rgba(255,255,255,0.6); }
+.feature-card .card-icon { font-size: 44px; }
+.feature-card h3 { font-size: 16px; font-weight: 600; }
+.feature-card p { font-size: 13px; color: var(--text-light); line-height: 1.5; }
 
-        /* 手机端适配 */
-        @media (max-width: 768px) {
-            .novel-wrap { height: 75vh; }
-            .side {
-                position: fixed; bottom: -80vh; left: 0; width: 100%; height: 70vh;
-                z-index: 2000; background: white; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-                border-radius: 30px 30px 0 0; padding-top: 30px;
-            }
-            .side.open { bottom: 0; box-shadow: 0 -10px 30px rgba(0,0,0,0.1); }
-            .fab { display: flex; }
-            .overlay {
-                position: fixed; inset: 0; background: rgba(0,0,0,0.3);
-                display: none; z-index: 1999; backdrop-filter: blur(4px);
-            }
-            .overlay.active { display: block; }
-        }
+.love-quote {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1.5px solid var(--glass-border);
+  border-radius: var(--radius);
+  padding: 24px;
+  text-align: center;
+  box-shadow: var(--shadow);
+}
+.love-quote .quote-text { font-size: 15px; font-style: italic; color: var(--text); line-height: 1.8; }
+.love-quote .quote-author { font-size: 13px; color: var(--text-light); margin-top: 8px; }
 
-        .novel-content p { margin-bottom: 18px; text-indent: 2em; line-height: 1.8; color: #555; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    </style>
+/* ===== Photo Wall ===== */
+.photo-page { display: flex; flex-direction: column; gap: 16px; }
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 10px;
+}
+.photo-item {
+  aspect-ratio: 1;
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: pointer;
+  background: var(--glass-bg);
+  transition: var(--transition);
+  -webkit-tap-highlight-color: transparent;
+}
+.photo-item:active { transform: scale(0.96); }
+.photo-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.photo-placeholder {
+  width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 40px;
+  background: linear-gradient(135deg, var(--peach), var(--lavender-light));
+}
+.photo-upload-hint {
+  text-align: center; font-size: 13px; color: var(--text-light);
+  padding: 16px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px dashed var(--glass-border);
+  border-radius: var(--radius);
+}
+
+/* ===== Lightbox ===== */
+.lightbox {
+  position: fixed; inset: 0; z-index: 999;
+  background: rgba(0,0,0,0.9);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+.lightbox.open { opacity: 1; visibility: visible; }
+.lightbox img {
+  max-width: 92vw; max-height: 80vh; border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  pointer-events: none;
+}
+.lightbox .close-btn {
+  position: absolute; top: max(16px, var(--safe-top)); right: 16px;
+  font-size: 32px; color: #fff; cursor: pointer; z-index: 2;
+  width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;
+  border-radius: 50%; background: rgba(255,255,255,0.12);
+  transition: var(--transition);
+  -webkit-tap-highlight-color: transparent;
+}
+.lightbox .close-btn:active { background: rgba(255,255,255,0.3); }
+.lightbox .nav-btn {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  font-size: 36px; color: #fff; cursor: pointer;
+  width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;
+  border-radius: 50%; background: rgba(255,255,255,0.12);
+  transition: var(--transition); user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.lightbox .nav-btn:active { background: rgba(255,255,255,0.3); }
+.lightbox .nav-btn.prev { left: 8px; }
+.lightbox .nav-btn.next { right: 8px; }
+
+/* ===== Novel Reader ===== */
+.novel-page { display: flex; flex-direction: column; gap: 0; }
+.reader-toolbar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 14px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+  position: sticky; top: calc(8px + var(--safe-top)); z-index: 10;
+}
+.toolbar-group { display: flex; align-items: center; gap: 4px; }
+.toolbar-btn {
+  width: 38px; height: 38px; border-radius: 50%;
+  border: 1px solid rgba(0,0,0,0.08);
+  background: rgba(255,255,255,0.5);
+  cursor: pointer; font-size: 15px;
+  display: flex; align-items: center; justify-content: center;
+  transition: var(--transition); color: var(--text);
+  -webkit-tap-highlight-color: transparent;
+  flex-shrink: 0;
+}
+.toolbar-btn:active { background: rgba(255, 154, 162, 0.25); }
+.toolbar-btn.active { background: var(--pink); color: #fff; border-color: var(--pink); }
+.toolbar-divider { width: 1px; height: 20px; background: rgba(0,0,0,0.08); margin: 0 4px; flex-shrink: 0; }
+.font-size-display { font-size: 13px; color: var(--text); min-width: 30px; text-align: center; font-weight: 500; }
+
+/* Chapter TOC button */
+.toc-btn {
+  margin-left: auto; padding: 8px 16px; border-radius: 50px;
+  border: 1px solid rgba(0,0,0,0.08);
+  background: rgba(255,255,255,0.5);
+  cursor: pointer; font-size: 14px; color: var(--text);
+  transition: var(--transition);
+  -webkit-tap-highlight-color: transparent;
+  white-space: nowrap; flex-shrink: 0;
+  min-height: 38px; display: flex; align-items: center; gap: 4px;
+}
+.toc-btn:active { background: rgba(255, 154, 162, 0.2); }
+
+/* ===== Chapter Drawer ===== */
+.drawer-overlay {
+  position: fixed; inset: 0; z-index: 100;
+  background: rgba(0,0,0,0.4);
+  opacity: 0; visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+.drawer-overlay.open { opacity: 1; visibility: visible; }
+
+.chapter-drawer {
+  position: fixed; top: 0; right: 0; bottom: 0; z-index: 101;
+  width: min(320px, 85vw);
+  background: #FFFBFD;
+  box-shadow: -4px 0 30px rgba(0,0,0,0.12);
+  transform: translateX(100%);
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex; flex-direction: column;
+  border-radius: 20px 0 0 20px;
+  overflow: hidden;
+}
+.chapter-drawer.open { transform: translateX(0); }
+
+.drawer-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 20px;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+  flex-shrink: 0;
+}
+.drawer-header h3 { font-size: 17px; font-weight: 600; }
+.drawer-close {
+  width: 36px; height: 36px; border-radius: 50%;
+  border: none; background: rgba(0,0,0,0.04);
+  font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  color: var(--text); transition: var(--transition);
+  -webkit-tap-highlight-color: transparent;
+}
+.drawer-close:active { background: rgba(0,0,0,0.1); }
+
+.drawer-list {
+  flex: 1; overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 8px 0 20px;
+}
+.drawer-volume-title {
+  padding: 12px 20px 4px;
+  font-size: 12px; font-weight: 600; color: var(--pink);
+  text-transform: uppercase; letter-spacing: 1px;
+}
+.drawer-chapter-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 20px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+  border-left: 3px solid transparent;
+}
+.drawer-chapter-item:active { background: rgba(255, 154, 162, 0.08); }
+.drawer-chapter-item.current {
+  background: rgba(255, 154, 162, 0.1);
+  border-left-color: var(--pink);
+  font-weight: 600;
+}
+.drawer-chapter-item .ch-num {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: rgba(255, 154, 162, 0.15);
+  font-size: 11px; font-weight: 600; color: var(--pink);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.drawer-chapter-item.current .ch-num { background: var(--pink); color: #fff; }
+.drawer-chapter-item .ch-title { font-size: 14px; color: var(--text); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ===== Reader Container ===== */
+.reader-container {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1.5px solid var(--glass-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  display: flex; flex-direction: column;
+}
+.reader-content {
+  padding: 28px 24px;
+  max-width: 680px;
+  width: 100%;
+  margin: 0 auto;
+  min-height: 50vh;
+  max-height: calc(100vh - 300px);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+.reader-content h2 { font-size: 18px; margin-bottom: 14px; font-weight: 600; text-align: center; }
+.reader-content p {
+  font-size: var(--reader-font-size, 16px);
+  line-height: var(--reader-line-height, 2);
+  margin-bottom: 14px;
+  text-indent: 2em;
+}
+.reader-content.theme-light { background: #FFFEF9; color: #3a3a3a; }
+.reader-content.theme-sepia { background: #F5ECD7; color: #5B4636; }
+.reader-content.theme-dark { background: #2A2A35; color: #D0D0D0; }
+
+.reader-nav {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 14px 18px;
+  border-top: 1px solid rgba(0,0,0,0.04);
+  flex-shrink: 0;
+}
+.reader-nav-btn {
+  padding: 10px 22px; border-radius: 50px;
+  border: 1px solid rgba(0,0,0,0.08);
+  background: rgba(255,255,255,0.5);
+  cursor: pointer; font-size: 14px; color: var(--text);
+  transition: var(--transition);
+  -webkit-tap-highlight-color: transparent;
+  min-height: 42px;
+}
+.reader-nav-btn:active { background: rgba(255, 154, 162, 0.2); }
+.reader-nav-btn:disabled { opacity: 0.3; pointer-events: none; }
+.reader-progress { font-size: 13px; color: var(--text-light); }
+
+/* ===== Toast ===== */
+.toast {
+  position: fixed; bottom: max(30px, calc(20px + var(--safe-bottom))); left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.78); color: #fff;
+  padding: 12px 24px; border-radius: 50px;
+  font-size: 14px; z-index: 2000;
+  pointer-events: none; white-space: nowrap;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  opacity: 0; transform: translateX(-50%) translateY(20px);
+}
+
+/* ================================================
+   MOBILE RESPONSIVE
+   ================================================ */
+
+/* Tablet & small desktop */
+@media (max-width: 768px) {
+  .app-container { padding: calc(8px + var(--safe-top)) 12px calc(80px + var(--safe-bottom)); }
+  .photo-grid { grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .reader-content { padding: 24px 18px; max-height: calc(100vh - 280px); }
+  .reader-toolbar { gap: 6px; padding: 10px 12px; }
+}
+
+/* Phone (large) */
+@media (max-width: 480px) {
+  .app-container { padding: calc(6px + var(--safe-top)) 10px calc(70px + var(--safe-bottom)); }
+  .top-bar { padding: 14px 2px; }
+  .top-bar .logo { font-size: 18px; }
+  .tab-nav { gap: 8px; margin-bottom: 18px; padding: 5px; }
+  .tab-btn { font-size: 13px; padding: 10px 12px; min-height: 40px; }
+  .feature-cards { grid-template-columns: 1fr; gap: 12px; }
+  .feature-card { padding: 22px 18px; min-height: auto; }
+  .feature-card .card-icon { font-size: 36px; }
+  .anniversary-card { padding: 28px 20px; }
+  .anniversary-card .days-count { font-size: 44px; }
+  .anniversary-card .heart-icon { font-size: 40px; }
+  .photo-grid { grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .photo-item { border-radius: 12px; }
+  .photo-placeholder { font-size: 32px; }
+  .reader-content { padding: 18px 14px; max-height: calc(100vh - 270px); }
+  .reader-content h2 { font-size: 16px; }
+  .reader-toolbar { gap: 5px; padding: 8px 10px; border-radius: 18px; position: sticky; top: 6px; }
+  .toolbar-btn { width: 34px; height: 34px; font-size: 14px; }
+  .toolbar-divider { margin: 0 2px; }
+  .toc-btn { padding: 6px 12px; font-size: 13px; min-height: 34px; }
+  .reader-nav { padding: 12px 14px; }
+  .reader-nav-btn { padding: 8px 16px; font-size: 13px; min-height: 38px; }
+  .chapter-drawer { width: 80vw; border-radius: 16px 0 0 16px; }
+  .password-card { padding: 36px 24px 28px; }
+  .password-card h1 { font-size: 19px; }
+  .password-card .lock-icon { font-size: 52px; }
+  .lightbox .nav-btn { width: 40px; height: 40px; font-size: 28px; }
+  .lightbox .close-btn { width: 40px; height: 40px; font-size: 26px; top: max(12px, var(--safe-top)); right: 8px; }
+  .deco { font-size: 20px !important; }
+}
+
+/* Phone (small) */
+@media (max-width: 360px) {
+  .app-container { padding: calc(4px + var(--safe-top)) 8px calc(60px + var(--safe-bottom)); }
+  .top-bar .logo { font-size: 16px; }
+  .tab-btn { font-size: 12px; padding: 8px 10px; min-height: 36px; }
+  .photo-grid { grid-template-columns: repeat(3, 1fr); gap: 4px; }
+  .photo-item { border-radius: 10px; }
+  .photo-placeholder { font-size: 28px; }
+  .anniversary-card .days-count { font-size: 38px; }
+  .reader-content { padding: 14px 10px; max-height: calc(100vh - 260px); }
+  .reader-content h2 { font-size: 15px; }
+  .reader-content p { font-size: var(--reader-font-size, 15px); }
+  .toolbar-btn { width: 30px; height: 30px; font-size: 13px; }
+  .toc-btn { padding: 5px 10px; font-size: 12px; min-height: 30px; }
+  .reader-nav-btn { padding: 8px 14px; font-size: 12px; min-height: 36px; }
+  .chapter-drawer { width: 85vw; }
+  .password-card { padding: 28px 18px 24px; }
+  .password-card h1 { font-size: 17px; }
+}
+
+/* Tablet landscape / desktop hover */
+@media (hover: hover) {
+  .feature-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12); }
+  .photo-item:hover { transform: scale(1.03); }
+  .password-card button:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(255, 154, 162, 0.4); }
+  .top-bar .logout-btn:hover { color: var(--pink); }
+  .toolbar-btn:hover { background: rgba(255, 154, 162, 0.15); }
+  .reader-nav-btn:hover { background: rgba(255, 154, 162, 0.15); }
+  .toc-btn:hover { background: rgba(255, 154, 162, 0.12); }
+  .lightbox .close-btn:hover { background: rgba(255,255,255,0.25); }
+  .lightbox .nav-btn:hover { background: rgba(255,255,255,0.25); }
+  .drawer-chapter-item:hover { background: rgba(255, 154, 162, 0.06); }
+  .drawer-close:hover { background: rgba(0,0,0,0.08); }
+}
+</style>
 </head>
 <body>
 
-    <div id="lock">
-        <div class="lock-card">
-            <h2 style="color: var(--accent)">💫 验证信号</h2>
-            <input type="password" id="pw" class="in" placeholder="输入专属暗号">
-            <button class="btn" onclick="unlock()">降落星球</button>
-        </div>
+<!-- Floating Background Decorations -->
+<div class="floating-decorations" id="decorations"></div>
+
+<!-- ===== Password Overlay ===== -->
+<div class="password-overlay" id="passwordOverlay">
+  <div class="password-card" id="passwordCard">
+    <div class="lock-icon">🔐</div>
+    <h1>欢迎来到我们的秘密花园</h1>
+    <p>请输入我们的专属密码</p>
+    <input type="password" id="passwordInput" placeholder="····" maxlength="20" autocomplete="off" inputmode="numeric">
+    <button onclick="verifyPassword()">💕 进 入</button>
+    <div class="password-error" id="passwordError"></div>
+  </div>
+</div>
+
+<!-- ===== Main App ===== -->
+<div class="app-container hidden-page" id="appContainer">
+  <div class="top-bar">
+    <div class="logo">🏠 我和小钱的家</div>
+    <button class="logout-btn" onclick="logout()">🚪 离开</button>
+  </div>
+
+  <nav class="tab-nav">
+    <button class="tab-btn active" data-page="home" onclick="switchPage('home')">💝 纪念日</button>
+    <button class="tab-btn" data-page="photo" onclick="switchPage('photo')">📸 照片墙</button>
+    <button class="tab-btn" data-page="novel" onclick="switchPage('novel')">📖 小说</button>
+  </nav>
+
+  <!-- Home Page -->
+  <div class="home-page page" id="homePage">
+    <div class="anniversary-card">
+      <div class="heart-icon">💕</div>
+      <h2>我们已经在一起</h2>
+      <div class="days-count" id="daysCount">--</div>
+      <div class="days-label">天</div>
+      <div class="date-info">从 <span id="startDateDisplay">----年--月--日</span> 开始 ❤️</div>
+    </div>
+    <div class="feature-cards">
+      <div class="feature-card" onclick="switchPage('photo')">
+        <div class="card-icon">📸</div><h3>照片墙</h3><p>记录我们的每一个甜蜜瞬间</p>
+      </div>
+      <div class="feature-card" onclick="switchPage('novel')">
+        <div class="card-icon">📖</div><h3>专属小说</h3><p>写给你的每一个故事</p>
+      </div>
+    </div>
+    <div class="love-quote">
+      <div class="quote-text">"遇见你，是我这辈子最美丽的意外。"</div>
+      <div class="quote-author">—— 写给小钱</div>
+    </div>
+  </div>
+
+  <!-- Photo Wall Page -->
+  <div class="photo-page page hidden-page" id="photoPage">
+    <div class="photo-grid" id="photoGrid"></div>
+    <div class="photo-upload-hint">💡 把照片放到 <strong>photos</strong> 文件夹，然后在代码里的 PHOTOS 数组中添加照片路径就可以啦～</div>
+  </div>
+
+  <!-- Novel Reader Page -->
+  <div class="novel-page page hidden-page" id="novelPage">
+    <div class="reader-toolbar">
+      <div class="toolbar-group">
+        <button class="toolbar-btn active" data-theme="light" onclick="setTheme('light')" aria-label="日间模式">☀️</button>
+        <button class="toolbar-btn" data-theme="sepia" onclick="setTheme('sepia')" aria-label="护眼模式">📜</button>
+        <button class="toolbar-btn" data-theme="dark" onclick="setTheme('dark')" aria-label="夜间模式">🌙</button>
+      </div>
+      <div class="toolbar-divider"></div>
+      <div class="toolbar-group">
+        <button class="toolbar-btn" onclick="changeFontSize(-1)" aria-label="缩小字号">A⁻</button>
+        <span class="font-size-display" id="fontSizeDisplay">16</span>
+        <button class="toolbar-btn" onclick="changeFontSize(1)" aria-label="放大字号">A⁺</button>
+      </div>
+      <button class="toc-btn" onclick="openDrawer()">📑 目录</button>
     </div>
 
-    <div id="app">
-        <div class="header">
-            <h1 class="title">我们异地恋的小星球🪐</h1>
-        </div>
-
-        <div class="card-cd">
-            <p style="color: #999; font-size: 0.9rem;">距离下次拥抱还有</p>
-            <div id="cd" class="time">计算中...</div>
-        </div>
-
-        <div class="tabs">
-            <button class="t-btn active" onclick="tab('diary', this)">情侣日记</button>
-            <button class="t-btn" onclick="tab('novel', this)">香香的小说</button>
-        </div>
-
-        <div id="diary" class="box active"></div>
-
-        <div id="novel" class="box">
-            <div class="novel-wrap">
-                <div class="overlay" id="mask" onclick="menu()"></div>
-                <div class="side" id="side">
-                    <h3 style="margin: 0 0 15px 10px; color: var(--accent);">章节目录</h3>
-                    <div id="clist"></div>
-                </div>
-                <div class="reader" id="reader">
-                    <h2 id="ctitle" style="margin-bottom: 25px; color: var(--accent);"></h2>
-                    <div id="ctext" class="novel-content"></div>
-                </div>
-            </div>
-            <button class="fab" onclick="menu()">📋</button>
-        </div>
+    <div class="reader-container">
+      <div class="reader-content theme-light" id="readerContent">
+        <h2 id="chapterTitle"></h2>
+        <div id="chapterBody"></div>
+      </div>
+      <div class="reader-nav">
+        <button class="reader-nav-btn" id="prevChapterBtn" onclick="prevChapter()">← 上一章</button>
+        <span class="reader-progress" id="readerProgress"></span>
+        <button class="reader-nav-btn" id="nextChapterBtn" onclick="nextChapter()">下一章 →</button>
+      </div>
     </div>
+  </div>
+</div>
 
-    <script>
-        // ==========================================
-        // 💎 这里是你唯一需要修改的数据区
-        // ==========================================
-        const DB = {
-            pw: "821718",             // 1. 进入密码
-            date: "2026/05/22",     // 2. 见面日期 (年/月/日)
+<!-- ===== Lightbox ===== -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
+  <button class="close-btn" onclick="closeLightbox(event)">&times;</button>
+  <button class="nav-btn prev" onclick="lightboxNav(-1, event)">‹</button>
+  <img src="" alt="照片" id="lightboxImg">
+  <button class="nav-btn next" onclick="lightboxNav(1, event)">›</button>
+</div>
 
-            // 3. 小说列表：["标题", "内容"]
-            // 提示：内容里可以直接按回车换行，不需要加任何代码
-            novels: [
-                ["第一章：重回高中", `　　“你也听说唱吗？”
-　　看着眼前两个女生惊喜的目光，余安一阵恍惚。
-　　“呃…听的！”他下意识回答。
-　　“那你平时……”左边女生话才出口，两人像被按了开关，齐刷刷转回身去。
-　　几乎是同时，一道冷冰冰的目光从前排扫过来。余安顺着看去，讲台上不知何时多了个表情严厉的女老师，她没点名，但那眼神足以让整个后排的温度降三度。
-　　突如其来的安静让余安得以思考现状。
-　　“我这是……穿越了？”他心想。明明前一秒还在和远隔千里的女友通电话，下一秒，就坐进了这间教室里。
-　　这种剥离感让他狠狠掐了下大腿。
-　　“嘶～！不是做梦？”
-　　短暂的惊讶过后，余安心里那点不安迅速被巨大的兴奋吞没。穿越啊！这可是多少网文读者梦寐以求的事！以前没体验过的，现在不都能……
-　　想到这里，他没能憋住，嘴角一咧，漏出一声傻笑：“诶嘿！✧(≖◡≖✿)”
-　　笑声虽轻，在安静的教室里却格外清晰。周围几个同学好奇地看过来，前面两个女生也忍不住扭头，捂嘴偷笑。余安这才惊觉还在晚自习，连忙收敛表情。
-　　可为时已晚，那道冰冷的目光再次锁定他，这次还带着更重的压迫感。
-　　“余安！下课到办公室来！”
-　　要是上辈子，余安肯定腿都软了。但此刻的他，内心毫无波澜，甚至还有点想笑——老师，您可能不知道，您面前的这个学生，可没那么简单(¬‿¬)️。
-　　就在两个女生交换眼神，庆幸“还好没点我们”时，老师的声音再次响起，像一盆冷水浇下：
-　　“杨妍和浅念！你们俩也一起来！”
-　　如果说有什么比被抓住更难受的，那一定是刚准备幸灾乐祸，就被一网打尽。
-　　下课铃响起，三人跟着老师走进办公室。
-　　“来，说说吧，有什么事情这么聊不够？”老师慢条斯理地拆开一袋茶叶，倒进杯子，注入热水，全程没看他们一眼，声音却自带威压，“不说是吧？那一个个来。余安，你先说。”
-　　“老师，我们真没聊天。”余安站得笔直，脸上还挂着人畜无害的笑容，“我就是跟她们借了个笔。”
-　　“借笔？”老师手上动作一顿，终于抬起眼皮看他，“借笔能笑成那样？”
-　　“老师，我……”余安一脸真诚，“我天生爱笑。”
-　　“噗——”
-　　身后传来两道没憋住的气声。杨妍和浅念死死捂住嘴，肩膀却控制不住地抖。
-　　老师的嘴角也隐约抽了一下，不知是被气笑了还是真觉得好笑。她端起茶杯抿了一口，摆摆手：“行了，这次就算了，我相信你是借东西。下次再让我抓到，你们自己挑个人，坐讲台边上来。”
-　　三人如获大赦，拼命点头。
-　　“走吧，把门带上。”
-　　一出门，杨妍就狠狠瞪了余安一眼：“都怪你！‘天生爱笑’，你怎么想的！”
-　　余安耸耸肩，望着走廊外的夜空，笑得意味深长：“你不懂，这叫……新生。”
-　　二人看着突然中二起来的余安，只觉莫名其妙，没多搭理他，继续回到了自己的位置上。
-　　余安不着急回教室，而是面对着夜空，布局起了自己的重生大业。
-　　“假如让你回到过去你最想干什么？”
-　　余安突然想起之前女友给他的一个问题。
-　　余安给出的回答是：“想早点和你在一起！”
-　　余安转头，透过窗户望着正在和杨妍说笑的浅念。
-　　“那我就先来找你了哦~(¯▽¯~)！”`],
+<!-- ===== Chapter Drawer ===== -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+<div class="chapter-drawer" id="chapterDrawer">
+  <div class="drawer-header">
+    <h3>📑 目录</h3>
+    <button class="drawer-close" onclick="closeDrawer()">✕</button>
+  </div>
+  <div class="drawer-list" id="drawerList"></div>
+</div>
 
-                ["第二章：还没准备好哦", `我已经加速写啦`],
+<script>
+// ==========================================
+// CONFIGURATION - 在这里修改设置
+// ==========================================
+const CONFIG = {
+  password: '1314',
+  anniversary: '2024-01-01',
+  partnerName: '小钱',
+};
 
-                ["第三章：未完待续", `我在加油！`]
-            ],
+// ==========================================
+// NOVEL CONTENT - 在这里修改小说内容
+// 支持两种方式组织章节目录：
+// 1. 不分卷：直接写 chapters 数组
+// 2. 分卷：给章节加 volume 字段，同名 volume 的章节会自动归为一卷
+//    不写 volume 的章节默认为 "" (不分卷)
+// ==========================================
+const NOVEL = {
+  title: '写给小钱的故事',
+  chapters: [
+    {
+      volume: '第一卷 · 初遇',
+      title: '第一章 · 初见',
+      content: `
+        <p>那是一个再普通不过的日子，阳光透过窗棂，在桌上投下斑驳的光影。</p>
+        <p>我坐在角落里，看着人来人往，直到你出现在门口。你穿着一件浅色的外套，笑起来眼睛弯成了月牙。那一刻，周围的一切仿佛都变成了慢镜头，喧闹的世界突然安静下来，只剩下心跳的声音。</p>
+        <p>我从来不相信一见钟情，直到遇见你。</p>
+        <p>你的声音很轻很柔，像春天的风拂过耳畔。我笨拙地回应着你说的每一句话，生怕说错一个字。后来你告诉我，你觉得那天我特别可爱，像个手足无措的小孩。</p>
+        <p>缘分就是这样奇妙的东西吧，在茫茫人海中，两个原本毫无交集的人，就这样相遇了。</p>
+      `
+    },
+    {
+      volume: '第一卷 · 初遇',
+      title: '第二章 · 心动',
+      content: `
+        <p>从那天起，我开始期待每一个能够见到你的时刻。</p>
+        <p>每天早上醒来，第一件事就是看手机有没有你的消息。你发来的每一个表情包，我都保存了下来。你分享的每一首歌，我都听了无数遍。你随口提到的每一件小事，我都悄悄记在了心里。</p>
+        <p>朋友们都说我变了，变得爱笑、变得温柔、变得对生活充满了期待。我想，这就是喜欢一个人的感觉吧。</p>
+        <p>我们一起走过傍晚的街道，路灯拉着长长的影子，我走在你的左边，替你挡住来往的车流。其实你不需要我的保护，但我就是想站在那个位置，这样离你更近一点。</p>
+        <p>有一天晚上，我们坐在长椅上看着星星。你没有说话，我也没有说话，但那种安静却比任何话语都要动人。好希望时间能永远停在那一刻。</p>
+      `
+    },
+    {
+      volume: '第二卷 · 相知',
+      title: '第三章 · 秘密',
+      content: `
+        <p>我开始写日记了。一本专门关于你的日记。</p>
+        <p>第一页写着你的名字，第二页画了一个歪歪扭扭的爱心，第三页开始是每天的小事——你今天穿了什么颜色的衣服，说了什么让我偷笑的话，又做了什么让我心动的小动作。</p>
+        <p>我把这本日记藏在枕头下面，每天晚上睡觉前都要翻一翻。有时候看着看着就笑了，笑着笑着就觉得自己好傻，但是又觉得好幸福。</p>
+        <p>后来你发现了这本日记。我紧张得手心冒汗，你却红着眼眶抱住了我。你说这是你收到过的，最珍贵的礼物。</p>
+        <p>其实，最珍贵的礼物是你啊。是你让我的世界变得五彩斑斓，是你让我开始期待每一个明天。</p>
+      `
+    },
+    {
+      volume: '第二卷 · 相知',
+      title: '第四章 · 约定',
+      content: `
+        <p>我们一起许下了很多约定。</p>
+        <p>约定要一起去看海，在沙滩上写下两个人的名字；约定要一起爬山，在山顶拥抱日出；约定要一起做饭，不管好不好吃都要吃完；约定吵架不许过夜，再生气也要在睡前说晚安。</p>
+        <p>最傻的一个约定是，我们说好了八十岁的时候还要手牵手去看樱花。到那个时候，你可能走不快了，那我就慢慢陪你走；你可能看不清了，那我就把樱花的样子讲给你听。</p>
+        <p>这些约定不是用来约束我们的，而是用来提醒我们——不管发生什么，都要记得曾在某个瞬间，我们如此坚定地选择过彼此。</p>
+        <p>故事还在继续，我想用余生来慢慢写。每一个今天，都是未来最美好的回忆。</p>
+      `
+    }
+  ]
+};
 
-            // 4. 日记列表：["日期", "标题", "内容"]
-            diaries: [
-                ["2026.03.05", "日记板块", "这个板块暂时用不了啦！我会加油升级的！"],
-                ["2026.03.04", "我们的小网站", "今天我们的专属小网站正式上线啦！希望宝宝会喜欢！"]
-            ]
-        };
-        // ==========================================
+// ==========================================
+// PHOTOS - 在这里添加照片
+// ==========================================
+const PHOTOS = [
+  // { src: 'photos/photo1.jpg', caption: '照片描述' },
+];
 
-        function unlock() {
-            if(document.getElementById('pw').value === DB.pw) {
-                document.getElementById('lock').style.display = 'none';
-                document.getElementById('app').style.display = 'block';
-                start();
-            } else { alert("暗号不对哦～❤️"); }
-        }
+// ==========================================
+// APP STATE
+// ==========================================
+let state = {
+  currentPage: 'home',
+  currentPhotoIndex: 0,
+  currentChapter: 0,
+  fontSize: 16,
+  theme: 'light',
+  drawerOpen: false,
+  touchStartX: 0,
+  touchStartY: 0,
+};
 
-        function start() {
-            // 倒计时逻辑
-            setInterval(() => {
-                const diff = new Date(DB.date) - new Date();
-                const d = Math.floor(diff/864e5), h = Math.floor(diff%864e5/36e5), m = Math.floor(diff%36e5/6e4), s = Math.floor(diff%6e4/1e3);
-                document.getElementById('cd').innerText = `${d}天 ${h}时 ${m}分 ${s}秒`;
-            }, 1000);
+// ==========================================
+// INITIALIZATION
+// ==========================================
+function init() {
+  createDecorations();
+  setupPasswordInput();
+  renderChapterDrawer();
+  loadSettings();
+  updateAnniversary();
+  renderPhotos();
+  loadChapter(state.currentChapter);
+  setupSwipe();
+  if (sessionStorage.getItem('lwed_auth') === 'true') {
+    showApp();
+  }
+  setInterval(updateAnniversary, 60000);
+}
 
-            // 渲染日记
-            document.getElementById('diary').innerHTML = DB.diaries.map(d => `
-                <div class="diary-card">
-                    <p style="color:var(--primary); font-weight:bold; font-size:0.8rem;">${d[0]}</p>
-                    <h3 style="margin:5px 0 10px;">${d[1]}</h3>
-                    <div style="color:#666;">${fmt(d[2])}</div>
-                </div>
-            `).join('');
+// ==========================================
+// DECORATIONS
+// ==========================================
+function createDecorations() {
+  const container = document.getElementById('decorations');
+  const emojis = ['🌸', '💕', '✨', '🦋', '🎀', '💖', '🌷', '⭐', '🧸', '🍰', '💝', '🌙'];
+  const isMobile = window.innerWidth < 480;
+  const count = isMobile ? 10 : 18;
+  for (let i = 0; i < count; i++) {
+    const el = document.createElement('span');
+    el.className = 'deco';
+    el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+    el.style.left = Math.random() * 100 + '%';
+    el.style.animationDelay = Math.random() * 8 + 's';
+    el.style.animationDuration = (6 + Math.random() * 8) + 's';
+    el.style.fontSize = (18 + Math.random() * 20) + 'px';
+    container.appendChild(el);
+  }
+}
 
-            // 渲染小说目录
-            const clist = document.getElementById('clist');
-            DB.novels.forEach((n, i) => {
-                const div = document.createElement('div');
-                div.className = 'ch-card';
-                div.innerText = n[0];
-                div.onclick = () => {
-                    document.getElementById('ctitle').innerText = n[0];
-                    document.getElementById('ctext').innerHTML = fmt(n[1]);
-                    document.querySelectorAll('.ch-card').forEach(c => c.classList.remove('active'));
-                    div.classList.add('active');
-                    document.getElementById('reader').scrollTop = 0;
-                    if(window.innerWidth <= 768) menu(); 
-                };
-                clist.appendChild(div);
-            });
-            if(clist.firstChild) clist.firstChild.click();
-        }
+// ==========================================
+// PASSWORD
+// ==========================================
+function setupPasswordInput() {
+  const input = document.getElementById('passwordInput');
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') verifyPassword();
+  });
+}
 
-        // 自动换行工具
-        function fmt(t) {
-            return t.split('\n').filter(l => l.trim()).map(l => `<p>${l.trim()}</p>`).join('');
-        }
+function verifyPassword() {
+  const input = document.getElementById('passwordInput');
+  const error = document.getElementById('passwordError');
+  const card = document.getElementById('passwordCard');
 
-        function tab(id, b) {
-            document.querySelectorAll('.box, .t-btn').forEach(e => e.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            b.classList.add('active');
-        }
+  if (input.value === CONFIG.password) {
+    error.textContent = '';
+    sessionStorage.setItem('lwed_auth', 'true');
+    document.getElementById('passwordOverlay').classList.add('hidden');
+    showApp();
+  } else {
+    error.textContent = '密码不对哦～再试一次吧 💕';
+    card.classList.remove('shake');
+    void card.offsetWidth;
+    card.classList.add('shake');
+    input.value = '';
+    input.focus();
+  }
+}
 
-        function menu() {
-            document.getElementById('side').classList.toggle('open');
-            document.getElementById('mask').classList.toggle('active');
-        }
-    </script>
+function showApp() {
+  document.getElementById('appContainer').classList.remove('hidden-page');
+  updateAnniversary();
+}
+
+function logout() {
+  sessionStorage.removeItem('lwed_auth');
+  document.getElementById('passwordOverlay').classList.remove('hidden');
+  document.getElementById('appContainer').classList.add('hidden-page');
+  document.getElementById('passwordInput').value = '';
+}
+
+// ==========================================
+// NAVIGATION
+// ==========================================
+function switchPage(pageName) {
+  state.currentPage = pageName;
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.page === pageName);
+  });
+  document.getElementById('homePage').classList.toggle('hidden-page', pageName !== 'home');
+  document.getElementById('photoPage').classList.toggle('hidden-page', pageName !== 'photo');
+  document.getElementById('novelPage').classList.toggle('hidden-page', pageName !== 'novel');
+  if (pageName === 'novel') updateReaderUI();
+}
+
+// ==========================================
+// ANNIVERSARY
+// ==========================================
+function updateAnniversary() {
+  const start = new Date(CONFIG.anniversary + 'T00:00:00');
+  const now = new Date();
+  const diffTime = now.getTime() - start.getTime();
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  document.getElementById('daysCount').textContent = diffDays >= 0 ? diffDays : '--';
+  document.getElementById('startDateDisplay').textContent =
+    `${start.getFullYear()}年${start.getMonth() + 1}月${start.getDate()}日`;
+}
+
+// ==========================================
+// PHOTO WALL
+// ==========================================
+function renderPhotos() {
+  const grid = document.getElementById('photoGrid');
+  if (PHOTOS.length === 0) {
+    const placeholders = ['🌸', '💕', '🦋', '🎀', '💖', '🌷'];
+    grid.innerHTML = placeholders.map((emoji) => `
+      <div class="photo-item" onclick="showPlaceholderHint()">
+        <div class="photo-placeholder">${emoji}</div>
+      </div>
+    `).join('');
+  } else {
+    grid.innerHTML = PHOTOS.map((photo, i) => `
+      <div class="photo-item" onclick="openLightbox(${i})">
+        <img src="${photo.src}" alt="${photo.caption || '照片'}" loading="lazy">
+      </div>
+    `).join('');
+  }
+}
+
+function showPlaceholderHint() {
+  showToast('💡 把照片放到 photos 文件夹，然后在代码里的 PHOTOS 数组中添加照片路径就可以啦～');
+}
+
+function showToast(msg) {
+  let toast = document.getElementById('toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'toast';
+    toast.className = 'toast';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = msg;
+  toast.style.opacity = '1';
+  toast.style.transform = 'translateX(-50%) translateY(0)';
+  clearTimeout(toast._timeout);
+  toast._timeout = setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(-50%) translateY(20px)';
+  }, 2200);
+}
+
+function openLightbox(index) {
+  if (PHOTOS.length === 0) { showPlaceholderHint(); return; }
+  state.currentPhotoIndex = index;
+  document.getElementById('lightboxImg').src = PHOTOS[index].src;
+  document.getElementById('lightbox').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeLightbox(e) {
+  if (e) e.stopPropagation();
+  document.getElementById('lightbox').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function lightboxNav(dir, e) {
+  if (e) e.stopPropagation();
+  if (PHOTOS.length === 0) return;
+  state.currentPhotoIndex = (state.currentPhotoIndex + dir + PHOTOS.length) % PHOTOS.length;
+  document.getElementById('lightboxImg').src = PHOTOS[state.currentPhotoIndex].src;
+}
+
+// Keyboard navigation for lightbox
+document.addEventListener('keydown', (e) => {
+  if (document.getElementById('lightbox').classList.contains('open')) {
+    if (e.key === 'Escape') closeLightbox();
+    if (e.key === 'ArrowLeft') lightboxNav(-1, e);
+    if (e.key === 'ArrowRight') lightboxNav(1, e);
+  }
+  if (e.key === 'Escape' && state.drawerOpen) closeDrawer();
+});
+
+// ==========================================
+// CHAPTER DRAWER
+// ==========================================
+function buildVolumeGroups() {
+  const groups = [];
+  let currentVolume = null;
+  NOVEL.chapters.forEach((ch, i) => {
+    const volName = ch.volume || '';
+    if (volName !== currentVolume) {
+      currentVolume = volName;
+      groups.push({ volume: volName, chapters: [] });
+    }
+    groups[groups.length - 1].chapters.push({ ...ch, index: i });
+  });
+  return groups;
+}
+
+function renderChapterDrawer() {
+  const list = document.getElementById('drawerList');
+  const groups = buildVolumeGroups();
+  let html = '';
+  groups.forEach(group => {
+    if (group.volume) {
+      html += `<div class="drawer-volume-title">${group.volume}</div>`;
+    }
+    group.chapters.forEach(ch => {
+      const cls = ch.index === state.currentChapter ? ' current' : '';
+      html += `
+        <div class="drawer-chapter-item${cls}" onclick="selectChapterFromDrawer(${ch.index})" data-ch="${ch.index}">
+          <span class="ch-num">${ch.index + 1}</span>
+          <span class="ch-title">${ch.title}</span>
+        </div>
+      `;
+    });
+  });
+  list.innerHTML = html;
+}
+
+function openDrawer() {
+  state.drawerOpen = true;
+  // Re-render to update current chapter highlight
+  renderChapterDrawer();
+  document.getElementById('drawerOverlay').classList.add('open');
+  document.getElementById('chapterDrawer').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  // Auto-scroll to current chapter
+  setTimeout(() => {
+    const currentItem = document.querySelector('.drawer-chapter-item.current');
+    if (currentItem) {
+      currentItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, 350);
+}
+
+function closeDrawer() {
+  state.drawerOpen = false;
+  document.getElementById('drawerOverlay').classList.remove('open');
+  document.getElementById('chapterDrawer').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function selectChapterFromDrawer(index) {
+  closeDrawer();
+  if (index !== state.currentChapter) {
+    loadChapter(index);
+  }
+}
+
+// ==========================================
+// NOVEL READER
+// ==========================================
+function loadChapter(index) {
+  index = parseInt(index);
+  const ch = NOVEL.chapters[index];
+  if (!ch) return;
+  state.currentChapter = index;
+
+  document.getElementById('chapterTitle').textContent = ch.title;
+  document.getElementById('chapterBody').innerHTML = ch.content;
+  document.getElementById('readerContent').scrollTop = 0;
+
+  updateReaderUI();
+  saveSettings();
+}
+
+function prevChapter() {
+  if (state.currentChapter > 0) loadChapter(state.currentChapter - 1);
+}
+
+function nextChapter() {
+  if (state.currentChapter < NOVEL.chapters.length - 1) loadChapter(state.currentChapter + 1);
+}
+
+function updateReaderUI() {
+  document.getElementById('prevChapterBtn').disabled = state.currentChapter === 0;
+  document.getElementById('nextChapterBtn').disabled = state.currentChapter === NOVEL.chapters.length - 1;
+  document.getElementById('readerProgress').textContent =
+    `${state.currentChapter + 1} / ${NOVEL.chapters.length}`;
+}
+
+function setTheme(theme) {
+  state.theme = theme;
+  const content = document.getElementById('readerContent');
+  content.className = 'reader-content theme-' + theme;
+  document.querySelectorAll('[data-theme]').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.theme === theme);
+  });
+  saveSettings();
+}
+
+function changeFontSize(delta) {
+  state.fontSize = Math.min(24, Math.max(12, state.fontSize + delta));
+  document.getElementById('readerContent').style.setProperty('--reader-font-size', state.fontSize + 'px');
+  document.getElementById('fontSizeDisplay').textContent = state.fontSize;
+  saveSettings();
+}
+
+// ==========================================
+// SWIPE GESTURE (for novel reader)
+// ==========================================
+function setupSwipe() {
+  const reader = document.getElementById('readerContent');
+  reader.addEventListener('touchstart', (e) => {
+    state.touchStartX = e.touches[0].clientX;
+    state.touchStartY = e.touches[0].clientY;
+  }, { passive: true });
+  reader.addEventListener('touchend', (e) => {
+    if (state.currentPage !== 'novel') return;
+    const dx = e.changedTouches[0].clientX - state.touchStartX;
+    const dy = e.changedTouches[0].clientY - state.touchStartY;
+    // Only trigger horizontal swipe (not vertical scroll)
+    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+      if (dx < 0) nextChapter();
+      else prevChapter();
+    }
+  });
+}
+
+// ==========================================
+// SETTINGS PERSISTENCE (localStorage)
+// ==========================================
+function saveSettings() {
+  localStorage.setItem('lwed_reader_settings', JSON.stringify({
+    chapter: state.currentChapter,
+    fontSize: state.fontSize,
+    theme: state.theme,
+  }));
+}
+
+function loadSettings() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('lwed_reader_settings'));
+    if (saved) {
+      state.currentChapter = saved.chapter || 0;
+      state.fontSize = saved.fontSize || 16;
+      state.theme = saved.theme || 'light';
+      document.getElementById('readerContent').style.setProperty('--reader-font-size', state.fontSize + 'px');
+      document.getElementById('fontSizeDisplay').textContent = state.fontSize;
+      setTheme(state.theme);
+    }
+  } catch (e) { /* ignore */ }
+}
+
+// ==========================================
+// STARTUP
+// ==========================================
+init();
+</script>
 </body>
 </html>
