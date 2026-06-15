@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>声音阵 · Sound Array</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0a0a14;
+  --surface: #12122a;
+  --surface2: #1a1a3e;
+  --text: #d0d0e0;
+  --text2: #8888aa;
+  --accent: #6c8cff;
+  --accent2: #4ecdc4;
+  --danger: #ff6b6b;
+  --border: #2a2a4a;
+  --radius: 14px;
+  --font: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  min-height: 100vh;
+  overflow-x: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* === Layout === */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+header {
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+header h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+header .subtitle {
+  font-size: 0.8rem;
+  color: var(--text2);
+  letter-spacing: 0.05em;
+}
+
+.main-layout {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+/* === Canvas Area === */
+.canvas-section {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  min-width: 0;
+}
+
+.canvas-wrapper {
+  position: relative;
+  width: min(60vh, 90vw, 600px);
+  height: min(60vh, 90vw, 600px);
+}
+
+canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}
+
+.canvas-hint {
+  position: absolute;
+  bottom: -28px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.75rem;
+  color: var(--text2);
+  white-space: nowrap;
+  pointer-events: none;
+  transition: opacity 0.4s;
+}
+
+/* === Control Panel === */
+.control-panel {
+  width: 340px;
+  flex-shrink: 0;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  border-left: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.panel-section h3 {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text2);
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+/* Upload */
+.upload-area {
+  border: 2px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.3s, background 0.3s;
+}
+.upload-area:hover, .upload-area.drag-over {
+  border-color: var(--accent);
+  background: rgba(108, 140, 255, 0.05);
+}
+.upload-area .icon { font-size: 1.8rem; margin-bottom: 6px; }
+.upload-area .label { font-size: 0.85rem; color: var(--text2); }
+.upload-area input { display: none; }
+
+/* Presets */
+.preset-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.preset-btn {
+  padding: 10px 8px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface2);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: all 0.25s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font);
+}
+.preset-btn:hover { border-color: var(--accent2); background: rgba(78, 205, 196, 0.08); }
+.preset-btn:active { transform: scale(0.96); }
+.preset-btn .emoji { font-size: 1.2rem; }
+.preset-btn.loading { opacity: 0.5; pointer-events: none; }
+
+/* Source List */
+.source-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--surface2);
+  border-radius: 10px;
+  margin-bottom: 8px;
+  transition: background 0.3s;
+}
+.source-item:hover { background: #22224a; }
+.source-item .color-dot {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  border: 2px solid rgba(255,255,255,0.15);
+}
+.source-item .info {
+  flex: 1;
+  min-width: 0;
+}
+.source-item .name {
+  font-size: 0.82rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.source-item .mode-badge {
+  font-size: 0.65rem;
+  padding: 2px 7px;
+  border-radius: 6px;
+  display: inline-block;
+  margin-top: 2px;
+}
+.mode-badge.ambient { background: rgba(108, 140, 255, 0.2); color: var(--accent); }
+.mode-badge.spatial { background: rgba(78, 205, 196, 0.2); color: var(--accent2); }
+
+.source-item .volume-slider {
+  width: 64px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+.source-item .btn-icon {
+  width: 28px; height: 28px;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.btn-play {
+  background: rgba(108, 140, 255, 0.15);
+  color: var(--accent);
+}
+.btn-play:hover { background: rgba(108, 140, 255, 0.3); }
+.btn-play.playing { background: rgba(78, 205, 196, 0.25); color: var(--accent2); }
+.btn-remove {
+  background: rgba(255, 107, 107, 0.1);
+  color: var(--danger);
+}
+.btn-remove:hover { background: rgba(255, 107, 107, 0.25); }
+
+/* Master Controls */
+.master-controls {
+  display: flex;
+  gap: 10px;
+  padding-top: 4px;
+}
+.master-btn {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface2);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: all 0.25s;
+  font-family: var(--font);
+}
+.master-btn:hover { border-color: var(--accent); }
+.master-btn.stop-all { color: var(--danger); border-color: rgba(255,107,107,0.3); }
+.master-btn.stop-all:hover { background: rgba(255,107,107,0.1); }
+
+.empty-state {
+  text-align: center;
+  padding: 24px;
+  color: var(--text2);
+  font-size: 0.82rem;
+  line-height: 1.6;
+}
+
+/* === Responsive === */
+@media (max-width: 800px) {
+  .main-layout { flex-direction: column; }
+  .canvas-section { flex: unset; height: 55vh; min-height: 320px; }
+  .canvas-wrapper { width: min(50vh, 85vw); height: min(50vh, 85vw); }
+  .control-panel { width: 100%; max-height: 45vh; border-left: none; border-top: 1px solid var(--border); }
+  header { padding: 12px 16px; }
+  header h1 { font-size: 1.2rem; }
+}
+
+/* Scrollbar */
+.control-panel::-webkit-scrollbar { width: 4px; }
+.control-panel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<div class="app-container">
+  <header>
+    <h1>声音阵</h1>
+    <span class="subtitle">Sound Array · 沉浸式白噪音</span>
+  </header>
+
+  <div class="main-layout">
+    <section class="canvas-section">
+      <div class="canvas-wrapper">
+        <canvas id="soundArray"></canvas>
+        <div class="canvas-hint" id="canvasHint">拖拽音源点调整方位 · 拖至圆心切换环境音模式</div>
+      </div>
+    </section>
+
+    <aside class="control-panel" id="controlPanel">
+      <div class="panel-section">
+        <h3>🎵 添加音源</h3>
+        <div class="upload-area" id="uploadArea">
+          <div class="icon">📁</div>
+          <div class="label">点击或拖拽上传音频文件<br><small style="opacity:0.6">支持 MP3 / WAV / OGG</small></div>
+          <input type="file" id="fileInput" accept="audio/*" multiple>
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <h3>🌿 预设环境音</h3>
+        <div class="preset-grid" id="presetGrid">
+          <button class="preset-btn" data-preset="rain"><span class="emoji">🌧️</span>雨声</button>
+          <button class="preset-btn" data-preset="wind"><span class="emoji">💨</span>风声</button>
+          <button class="preset-btn" data-preset="fire"><span class="emoji">🔥</span>篝火</button>
+          <button class="preset-btn" data-preset="ocean"><span class="emoji">🌊</span>海浪</button>
+          <button class="preset-btn" data-preset="stream"><span class="emoji">💧</span>溪流</button>
+          <button class="preset-btn" data-preset="night"><span class="emoji">🦗</span>夏夜</button>
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <h3>🔊 音源列表</h3>
+        <div id="sourceList">
+          <div class="empty-state">
+            暂无音源<br>上传音频或点击预设添加
+          </div>
+        </div>
+      </div>
+
+      <div class="master-controls">
+        <button class="master-btn stop-all" id="btnStopAll">⏹ 全部停止</button>
+        <button class="master-btn" id="btnResetAll">🔄 重置位置</button>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<script>
+(function() {
+'use strict';
+
+// ============================================================
+//  CONSTANTS & STATE
+// ============================================================
+const CENTER_SNAP_THRESHOLD = 28;        // px from center = ambient mode
+const MAX_DISTANCE_ATTENUATION = 0.70;   // max volume reduction at circle edge (1.0 → 0.3)
+const CANVAS_LOGICAL_SIZE = 600;         // internal canvas resolution
+const SOURCE_COLORS = [
+  '#6c8cff', '#4ecdc4', '#ff6b6b', '#ffe66d', '#a29bfe',
+  '#fd79a8', '#00cec9', '#fdcb6e', '#e17055', '#74b9ff',
+  '#55efc4', '#fab1a0', '#81ecec', '#dfe6e9'
+];
+
+let audioCtx = null;
+let sharedReverbIR = null; // shared impulse response buffer
+let sources = [];           // SoundSource[]
+let nextId = 1;
+let draggingSource = null;
+let dragOffsetX = 0;
+let dragOffsetY = 0;
+let animationId = null;
+let time = 0;
+let audioInitialized = false;
+
+// ============================================================
+//  AUDIO ENGINE INITIALIZATION
+// ============================================================
+async function initAudio() {
+  if (audioInitialized) return;
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  sharedReverbIR = createReverbIR(audioCtx, 2.5);
+  audioInitialized = true;
+}
+
+function createReverbIR(ctx, duration) {
+  const sr = ctx.sampleRate;
+  const len = Math.floor(sr * duration);
+  const buffer = ctx.createBuffer(2, len, sr);
+
+  for (let ch = 0; ch < 2; ch++) {
+    const data = buffer.getChannelData(ch);
+    for (let i = 0; i < len; i++) {
+      const t = i / sr;
+      const envelope = Math.exp(-t * 2.2) * (1.0 - t / duration * 0.3);
+      data[i] = (Math.random() * 2 - 1) * envelope;
+    }
+  }
+  return buffer;
+}
+
+// ============================================================
+//  SOUND SOURCE CLASS
+// ============================================================
+class SoundSource {
+  constructor(id, name, buffer) {
+    this.id = id;
+    this.name = name;
+    this.buffer = buffer;
+    this.isPlaying = false;
+    this.volume = 0.75;
+
+    // Position in polar coords (angle in radians, radius in pixels)
+    this.angle = 0;
+    this.radius = 0;
+
+    // Canvas position in logical coords (updated by renderer)
+    this.x = CANVAS_LOGICAL_SIZE / 2;
+    this.y = CANVAS_LOGICAL_SIZE / 2;
+
+    // Color
+    this.color = SOURCE_COLORS[(id - 1) % SOURCE_COLORS.length];
+
+    // Audio nodes
+    this.sourceNode = null;
+    this.userGain = audioCtx.createGain();
+    this.userGain.gain.value = this.volume;
+
+    // Ambient path
+    this.ambientGain = audioCtx.createGain();
+    this.ambientGain.gain.value = 1;
+    this.convolver = audioCtx.createConvolver();
+    this.convolver.buffer = sharedReverbIR;
+    this.convolverGain = audioCtx.createGain();
+    this.convolverGain.gain.value = 0.35;
+
+    // Spatial path — StereoPannerNode for direct left/right channel separation
+    this.spatialGain = audioCtx.createGain();
+    this.spatialGain.gain.value = 0;
+    this.panner = audioCtx.createStereoPanner();
+    this.panner.pan.value = 0;
+
+    // Distance filter (high-frequency rolloff for far sounds)
+    this.distanceFilter = audioCtx.createBiquadFilter();
+    this.distanceFilter.type = 'lowpass';
+    this.distanceFilter.frequency.value = 20000;
+    this.distanceFilter.Q.value = 0.5;
+    this.distanceGain = audioCtx.createGain();
+    this.distanceGain.gain.value = 1;
+
+    // Dry output for ambient mode
+    this.dryGain = audioCtx.createGain();
+    this.dryGain.gain.value = 0.85;
+
+    // Build signal chain (static connections)
+    // Spatial: userGain → spatialGain → stereoPanner → distanceFilter → distanceGain → destination
+    this.userGain.connect(this.dryGain);
+    this.dryGain.connect(audioCtx.destination);
+
+    // Ambient reverb send
+    this.userGain.connect(this.ambientGain);
+    this.ambientGain.connect(this.convolver);
+    this.convolver.connect(this.convolverGain);
+    this.convolverGain.connect(audioCtx.destination);
+
+    // Spatial path
+    this.userGain.connect(this.spatialGain);
+    this.spatialGain.connect(this.panner);
+    this.panner.connect(this.distanceFilter);
+    this.distanceFilter.connect(this.distanceGain);
+    this.distanceGain.connect(audioCtx.destination);
+  }
+
+  play() {
+    if (this.isPlaying) return;
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+
+    this.sourceNode = audioCtx.createBufferSource();
+    this.sourceNode.buffer = this.buffer;
+    this.sourceNode.loop = true;
+    this.sourceNode.connect(this.userGain);
+    this.sourceNode.start();
+    this.isPlaying = true;
+  }
+
+  stop() {
+    if (!this.isPlaying) return;
+    if (this.sourceNode) {
+      try { this.sourceNode.stop(); } catch(e) {}
+      this.sourceNode.disconnect();
+      this.sourceNode = null;
+    }
+    this.isPlaying = false;
+  }
+
+  setVolume(v) {
+    this.volume = Math.max(0, Math.min(1, v));
+    this.userGain.gain.setTargetAtTime(this.volume, audioCtx.currentTime, 0.05);
+  }
+
+  /** Update based on polar position (angle in rad, radius in px of logical canvas) */
+  updatePosition(angle, radius, maxRadius) {
+    this.angle = angle;
+    this.radius = Math.max(0, Math.min(radius, maxRadius));
+
+    const now = audioCtx.currentTime;
+    const isAmbient = this.radius <= CENTER_SNAP_THRESHOLD;
+
+    if (isAmbient) {
+      // Ambient mode: wide stereo with reverb + dry signal
+      this.dryGain.gain.setTargetAtTime(0.85, now, 0.08);
+      this.ambientGain.gain.setTargetAtTime(1, now, 0.08);
+      this.spatialGain.gain.setTargetAtTime(0, now, 0.08);
+    } else {
+      // Spatial mode: StereoPannerNode (direct L/R channel split)
+      this.dryGain.gain.setTargetAtTime(0, now, 0.08);
+      this.ambientGain.gain.setTargetAtTime(0, now, 0.08);
+      this.spatialGain.gain.setTargetAtTime(1, now, 0.08);
+
+      // Pan: cos(angle) maps directly to left(-1)/right(+1)
+      // Scale by distance so near-center points have subtle pan, far points are extreme
+      const normDist = this.radius / maxRadius;
+      const panStrength = Math.min(1, normDist * 2.5); // 0 → 1 over first 40% of radius
+      const panValue = Math.cos(this.angle) * panStrength;
+      this.panner.pan.setTargetAtTime(panValue, now, 0.06);
+
+      // Distance attenuation: reduce gain + apply lowpass
+      const distGain = 1 - normDist * MAX_DISTANCE_ATTENUATION;
+      this.distanceGain.gain.setTargetAtTime(distGain, now, 0.08);
+
+      // High-frequency rolloff based on distance
+      const cutoffFreq = 20000 - normDist * 18000;
+      this.distanceFilter.frequency.setTargetAtTime(Math.max(500, cutoffFreq), now, 0.08);
+    }
+  }
+
+  dispose() {
+    this.stop();
+    this.userGain.disconnect();
+    this.dryGain.disconnect();
+    this.ambientGain.disconnect();
+    this.convolver.disconnect();
+    this.convolverGain.disconnect();
+    this.spatialGain.disconnect();
+    this.panner.disconnect();
+    this.distanceFilter.disconnect();
+    this.distanceGain.disconnect();
+  }
+}
+
+// ============================================================
+//  PRESET GENERATORS
+// ============================================================
+async function generatePreset(type) {
+  if (!audioInitialized) await initAudio();
+  const sr = audioCtx.sampleRate;
+
+  switch (type) {
+    case 'rain':   return generateRain(audioCtx, sr);
+    case 'wind':   return generateWind(audioCtx, sr);
+    case 'fire':   return generateFire(audioCtx, sr);
+    case 'ocean':  return generateOcean(audioCtx, sr);
+    case 'stream': return generateStream(audioCtx, sr);
+    case 'night':  return generateNight(audioCtx, sr);
+    default:       return null;
+  }
+}
+
+async function generateRain(ctx, sr) {
+  const duration = 4;
+  const offline = new OfflineAudioContext(1, sr * duration, sr);
+  const buf = offline.createBuffer(1, sr * duration, sr);
+  const data = buf.getChannelData(0);
+  for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+  const noise = offline.createBufferSource(); noise.buffer = buf;
+  const hp = offline.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 800; hp.Q.value = 0.5;
+  const bp = offline.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 3500; bp.Q.value = 0.3;
+  const lp = offline.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 8000; lp.Q.value = 0.3;
+  const gain = offline.createGain(); gain.gain.value = 0.55;
+  const lfo = offline.createOscillator(); lfo.frequency.value = 0.3;
+  const lfoGain = offline.createGain(); lfoGain.gain.value = 0.15;
+  lfo.connect(lfoGain); lfoGain.connect(gain.gain); lfo.start();
+  noise.connect(hp); hp.connect(bp); bp.connect(lp); lp.connect(gain);
+  gain.connect(offline.destination); noise.start();
+  return offline.startRendering();
+}
+
+async function generateWind(ctx, sr) {
+  const duration = 6;
+  const offline = new OfflineAudioContext(1, sr * duration, sr);
+  const buf = offline.createBuffer(1, sr * duration, sr);
+  const data = buf.getChannelData(0);
+  for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+  const noise = offline.createBufferSource(); noise.buffer = buf;
+  const lp1 = offline.createBiquadFilter(); lp1.type = 'lowpass'; lp1.frequency.value = 400; lp1.Q.value = 0.7;
+  const lp2 = offline.createBiquadFilter(); lp2.type = 'lowpass'; lp2.frequency.value = 300; lp2.Q.value = 0.5;
+  const gain = offline.createGain(); gain.gain.value = 0.5;
+  const lfo = offline.createOscillator(); lfo.frequency.value = 0.15;
+  const lfoGain = offline.createGain(); lfoGain.gain.value = 0.35;
+  const lfo2 = offline.createOscillator(); lfo2.frequency.value = 0.08;
+  const lfo2Gain = offline.createGain(); lfo2Gain.gain.value = 0.1;
+  lfo.connect(lfoGain); lfoGain.connect(gain.gain); lfo.start();
+  lfo2.connect(lfo2Gain); lfo2Gain.connect(lp1.frequency); lfo2.start();
+  noise.connect(lp1); lp1.connect(lp2); lp2.connect(gain);
+  gain.connect(offline.destination); noise.start();
+  return offline.startRendering();
+}
+
+async function generateFire(ctx, sr) {
+  const duration = 3;
+  const offline = new OfflineAudioContext(1, sr * duration, sr);
+  const buf = offline.createBuffer(1, sr * duration, sr);
+  const data = buf.getChannelData(0);
+  for (let i = 0; i < data.length; i++) {
+    const r = Math.random();
+    data[i] = (r > 0.7 ? (Math.random() * 2 - 1) * 1.5 : (Math.random() * 2 - 1) * 0.3);
+  }
+  const noise = offline.createBufferSource(); noise.buffer = buf;
+  const bp = offline.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 2500; bp.Q.value = 0.4;
+  const lp = offline.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 6000; lp.Q.value = 0.5;
+  const gain = offline.createGain(); gain.gain.value = 0.45;
+  const buf2 = offline.createBuffer(1, sr * duration, sr);
+  const data2 = buf2.getChannelData(0);
+  for (let i = 0; i < data2.length; i++) data2[i] = Math.random() * 2 - 1;
+  const noise2 = offline.createBufferSource(); noise2.buffer = buf2;
+  const lp2 = offline.createBiquadFilter(); lp2.type = 'lowpass'; lp2.frequency.value = 120; lp2.Q.value = 0.5;
+  const gain2 = offline.createGain(); gain2.gain.value = 0.25;
+  noise2.connect(lp2); lp2.connect(gain2); gain2.connect(offline.destination); noise2.start();
+  noise.connect(bp); bp.connect(lp); lp.connect(gain);
+  gain.connect(offline.destination); noise.start();
+  return offline.startRendering();
+}
+
+async function generateOcean(ctx, sr) {
+  const duration = 8;
+  const offline = new OfflineAudioContext(1, sr * duration, sr);
+  const buf = offline.createBuffer(1, sr * duration, sr);
+  const data = buf.getChannelData(0);
+  for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+  const noise = offline.createBufferSource(); noise.buffer = buf;
+  const lp = offline.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 350; lp.Q.value = 0.3;
+  const gain = offline.createGain(); gain.gain.value = 0.5;
+  const lfo = offline.createOscillator(); lfo.frequency.value = 0.12;
+  const lfoGain = offline.createGain(); lfoGain.gain.value = 0.45;
+  lfo.connect(lfoGain); lfoGain.connect(gain.gain); lfo.start();
+  const lfo2 = offline.createOscillator(); lfo2.frequency.value = 0.07;
+  const lfo2Gain = offline.createGain(); lfo2Gain.gain.value = 150;
+  lfo2.connect(lfo2Gain); lfo2Gain.connect(lp.frequency); lfo2.start();
+  noise.connect(lp); lp.connect(gain); gain.connect(offline.destination); noise.start();
+  return offline.startRendering();
+}
+
+async function generateStream(ctx, sr) {
+  const duration = 4;
+  const offline = new OfflineAudioContext(1, sr * duration, sr);
+  const buf = offline.createBuffer(1, sr * duration, sr);
+  const data = buf.getChannelData(0);
+  for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+  const noise = offline.createBufferSource(); noise.buffer = buf;
+  const hp = offline.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 600; hp.Q.value = 0.5;
+  const bp = offline.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 2500; bp.Q.value = 0.35;
+  const gain = offline.createGain(); gain.gain.value = 0.4;
+  const lfo = offline.createOscillator(); lfo.frequency.value = 0.5;
+  const lfoGain = offline.createGain(); lfoGain.gain.value = 0.1;
+  lfo.connect(lfoGain); lfoGain.connect(gain.gain); lfo.start();
+  noise.connect(hp); hp.connect(bp); bp.connect(gain);
+  gain.connect(offline.destination); noise.start();
+  return offline.startRendering();
+}
+
+async function generateNight(ctx, sr) {
+  const duration = 5;
+  const offline = new OfflineAudioContext(1, sr * duration, sr);
+  const buf = offline.createBuffer(1, sr * duration, sr);
+  const data = buf.getChannelData(0);
+  for (let i = 0; i < data.length; i++) {
+    const phase = (i / sr) % 0.25;
+    const chirp = phase < 0.02 ? Math.sin(phase * 500) * (1 - phase / 0.02) : 0;
+    data[i] = chirp * 0.5 + (Math.random() * 2 - 1) * 0.15;
+  }
+  const noise = offline.createBufferSource(); noise.buffer = buf;
+  const bp = offline.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 4500; bp.Q.value = 1.5;
+  const lp = offline.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 8000; lp.Q.value = 0.5;
+  const gain = offline.createGain(); gain.gain.value = 0.35;
+  noise.connect(bp); bp.connect(lp); lp.connect(gain);
+  gain.connect(offline.destination); noise.start();
+  return offline.startRendering();
+}
+
+// ============================================================
+//  SOURCE MANAGER
+// ============================================================
+function addSource(name, buffer) {
+  const id = nextId++;
+  const source = new SoundSource(id, name, buffer);
+  sources.push(source);
+  source.play();
+  updateSourceListUI();
+  updateCanvasHint();
+  return source;
+}
+
+function removeSource(id) {
+  const idx = sources.findIndex(s => s.id === id);
+  if (idx === -1) return;
+  sources[idx].dispose();
+  sources.splice(idx, 1);
+  if (draggingSource && draggingSource.id === id) draggingSource = null;
+  updateSourceListUI();
+  updateCanvasHint();
+}
+
+function toggleSource(id) {
+  const source = sources.find(s => s.id === id);
+  if (!source) return;
+  if (source.isPlaying) source.stop();
+  else source.play();
+  updateSourceListUI();
+}
+
+function updateSourcePosition(source, angle, radius, maxRadius) {
+  source.updatePosition(angle, radius, maxRadius);
+  if (radius <= CENTER_SNAP_THRESHOLD) source.radius = 0;
+  updateSourceListUI();
+}
+
+function stopAll() {
+  sources.forEach(s => s.stop());
+  updateSourceListUI();
+}
+
+function resetAllPositions() {
+  sources.forEach(s => {
+    s.angle = 0;
+    s.radius = 0;
+    s.updatePosition(0, 0, 1);
+  });
+  updateSourceListUI();
+}
+
+// ============================================================
+//  CANVAS RENDERER
+// ============================================================
+const canvas = document.getElementById('soundArray');
+const ctx = canvas.getContext('2d');
+const canvasHint = document.getElementById('canvasHint');
+
+function resizeCanvas() {
+  const wrapper = canvas.parentElement;
+  const size = wrapper.clientWidth;
+  canvas.width = CANVAS_LOGICAL_SIZE;
+  canvas.height = CANVAS_LOGICAL_SIZE;
+  canvas.style.width = size + 'px';
+  canvas.style.height = size + 'px';
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+function getCircleParams() {
+  const cx = CANVAS_LOGICAL_SIZE / 2;
+  const cy = CANVAS_LOGICAL_SIZE / 2;
+  const maxRadius = CANVAS_LOGICAL_SIZE / 2 - 30;
+  return { cx, cy, maxRadius };
+}
+
+function render() {
+  ctx.clearRect(0, 0, CANVAS_LOGICAL_SIZE, CANVAS_LOGICAL_SIZE);
+  const { cx, cy, maxRadius } = getCircleParams();
+
+  const bgGrad = ctx.createRadialGradient(cx, cy, maxRadius * 0.3, cx, cy, maxRadius);
+  bgGrad.addColorStop(0, 'rgba(20, 20, 50, 0.9)');
+  bgGrad.addColorStop(0.7, 'rgba(15, 15, 40, 0.85)');
+  bgGrad.addColorStop(1, 'rgba(10, 10, 30, 0.7)');
+  ctx.fillStyle = bgGrad;
+  ctx.beginPath(); ctx.arc(cx, cy, maxRadius, 0, Math.PI * 2); ctx.fill();
+
+  ctx.strokeStyle = 'rgba(100, 120, 200, 0.3)'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.arc(cx, cy, maxRadius, 0, Math.PI * 2); ctx.stroke();
+
+  ctx.strokeStyle = 'rgba(100, 120, 200, 0.15)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.arc(cx, cy, maxRadius * 0.66, 0, Math.PI * 2); ctx.stroke();
+
+  ctx.strokeStyle = 'rgba(100, 120, 200, 0.12)'; ctx.setLineDash([4, 8]);
+  ctx.beginPath(); ctx.arc(cx, cy, CENTER_SNAP_THRESHOLD, 0, Math.PI * 2); ctx.stroke();
+  ctx.setLineDash([]);
+
+  ctx.strokeStyle = 'rgba(100, 120, 200, 0.06)'; ctx.lineWidth = 1;
+  for (let a = 0; a < Math.PI * 2; a += Math.PI / 6) {
+    ctx.beginPath(); ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + Math.cos(a) * maxRadius, cy + Math.sin(a) * maxRadius); ctx.stroke();
+  }
+
+  const pulseSize = 1 + Math.sin(time * 2) * 0.15;
+  const centerGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 14 * pulseSize);
+  centerGrad.addColorStop(0, 'rgba(255,255,255,0.9)');
+  centerGrad.addColorStop(0.5, 'rgba(200,210,255,0.5)');
+  centerGrad.addColorStop(1, 'rgba(100,120,255,0)');
+  ctx.fillStyle = centerGrad;
+  ctx.beginPath(); ctx.arc(cx, cy, 14 * pulseSize, 0, Math.PI * 2); ctx.fill();
+
+  ctx.fillStyle = '#0a0a14';
+  ctx.beginPath(); ctx.arc(cx, cy - 2, 5, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(cx, cy + 6, 7, 5, 0, 0, Math.PI * 2); ctx.fill();
+
+  ctx.fillStyle = 'rgba(255,255,255,0.7)';
+  ctx.font = '11px "PingFang SC","Microsoft YaHei",sans-serif';
+  ctx.textAlign = 'center'; ctx.fillText('听者', cx, cy + 22);
+
+  sources.forEach(source => {
+    const isAmbient = source.radius <= CENTER_SNAP_THRESHOLD;
+    const sx = isAmbient ? cx : cx + Math.cos(source.angle) * source.radius;
+    const sy = isAmbient ? cy : cy + Math.sin(source.angle) * source.radius;
+    source.x = sx; source.y = sy;
+
+    if (!isAmbient && source.radius > 0) {
+      ctx.strokeStyle = source.color + '33'; ctx.lineWidth = 1.5; ctx.setLineDash([4, 6]);
+      ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(sx, sy); ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    const glowSize = isAmbient ? 20 : 12;
+    const glowGrad = ctx.createRadialGradient(sx, sy, 0, sx, sy, glowSize);
+    glowGrad.addColorStop(0, source.color + 'aa');
+    glowGrad.addColorStop(0.5, source.color + '30');
+    glowGrad.addColorStop(1, source.color + '00');
+    ctx.fillStyle = glowGrad;
+    ctx.beginPath(); ctx.arc(sx, sy, glowSize, 0, Math.PI * 2); ctx.fill();
+
+    const dotSize = isAmbient ? 10 : 8;
+    if (source.isPlaying && isAmbient) {
+      const pulse = 1 + Math.sin(time * 3 + source.id) * 0.2;
+      ctx.fillStyle = source.color;
+      ctx.beginPath(); ctx.arc(sx, sy, dotSize * pulse, 0, Math.PI * 2); ctx.fill();
+    } else {
+      ctx.fillStyle = source.isPlaying ? source.color : source.color + '55';
+      ctx.beginPath(); ctx.arc(sx, sy, dotSize, 0, Math.PI * 2); ctx.fill();
+    }
+
+    ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+    ctx.lineWidth = isAmbient ? 2 : 1.5;
+    ctx.beginPath(); ctx.arc(sx, sy, isAmbient ? dotSize * 1.15 + 1 : dotSize + 1, 0, Math.PI * 2); ctx.stroke();
+
+    const labelY = isAmbient ? sy - 18 : sy - 14;
+    const label = source.name.length > 6 ? source.name.slice(0, 6) + '…' : source.name;
+    const textWidth = ctx.measureText(label).width;
+    ctx.font = `bold ${isAmbient ? '12' : '11'}px "PingFang SC","Microsoft YaHei",sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.fillStyle = 'rgba(10,10,20,0.7)';
+    ctx.fillRect(sx - textWidth / 2 - 5, labelY - 11, textWidth + 10, 16);
+    ctx.fillStyle = 'rgba(255,255,255,0.85)';
+    ctx.fillText(label, sx, labelY + 3);
+  });
+
+  time += 0.016;
+}
+
+function updateCanvasHint() {
+  if (sources.length === 0) {
+    canvasHint.textContent = '添加音源开始体验 · 上传音频或点击预设';
+    canvasHint.style.opacity = '1';
+  } else if (sources.some(s => s.radius > CENTER_SNAP_THRESHOLD)) {
+    canvasHint.textContent = '拖拽音源点调整方位 · 拖至圆心切换环境音模式';
+    canvasHint.style.opacity = '0.7';
+  } else {
+    canvasHint.textContent = '拖拽圆心内的音源点至外围体验空间音频';
+    canvasHint.style.opacity = '0.6';
+  }
+}
+
+function animateLoop() {
+  render();
+  animationId = requestAnimationFrame(animateLoop);
+}
+
+// ============================================================
+//  DRAG INTERACTION
+// ============================================================
+function getCanvasCoords(e) {
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = CANVAS_LOGICAL_SIZE / rect.width;
+  const scaleY = CANVAS_LOGICAL_SIZE / rect.height;
+  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+  const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+  return { x: (clientX - rect.left) * scaleX, y: (clientY - rect.top) * scaleY };
+}
+
+function hitTestSource(mx, my) {
+  for (let i = sources.length - 1; i >= 0; i--) {
+    const s = sources[i];
+    const dx = mx - s.x; const dy = my - s.y;
+    if (Math.sqrt(dx * dx + dy * dy) < 18) return s;
+  }
+  return null;
+}
+
+canvas.addEventListener('mousedown', onPointerDown);
+canvas.addEventListener('touchstart', onPointerDown, { passive: false });
+
+function onPointerDown(e) {
+  if (!audioInitialized) initAudio().then(() => {});
+  e.preventDefault();
+  const { x, y } = getCanvasCoords(e);
+  const source = hitTestSource(x, y);
+  if (source) {
+    draggingSource = source;
+    dragOffsetX = source.x - x;
+    dragOffsetY = source.y - y;
+    canvas.style.cursor = 'grabbing';
+  }
+}
+
+window.addEventListener('mousemove', (e) => {
+  if (!draggingSource) {
+    const { x, y } = getCanvasCoords(e);
+    canvas.style.cursor = hitTestSource(x, y) ? 'grab' : 'default';
+    return;
+  }
+  const { x, y } = getCanvasCoords(e);
+  const mx = x + dragOffsetX; const my = y + dragOffsetY;
+  const { cx, cy, maxRadius } = getCircleParams();
+  const dx = mx - cx; const dy = my - cy;
+  let angle = Math.atan2(dy, dx);
+  let radius = Math.sqrt(dx * dx + dy * dy);
+  if (radius > maxRadius) radius = maxRadius;
+  if (radius <= CENTER_SNAP_THRESHOLD) radius = 0;
+  updateSourcePosition(draggingSource, angle, radius, maxRadius);
+});
+
+window.addEventListener('touchmove', (e) => {
+  if (!draggingSource) return;
+  e.preventDefault();
+  const { x, y } = getCanvasCoords(e);
+  const mx = x + dragOffsetX; const my = y + dragOffsetY;
+  const { cx, cy, maxRadius } = getCircleParams();
+  const dx = mx - cx; const dy = my - cy;
+  let angle = Math.atan2(dy, dx);
+  let radius = Math.sqrt(dx * dx + dy * dy);
+  if (radius > maxRadius) radius = maxRadius;
+  if (radius <= CENTER_SNAP_THRESHOLD) radius = 0;
+  updateSourcePosition(draggingSource, angle, radius, maxRadius);
+}, { passive: false });
+
+window.addEventListener('mouseup', onPointerUp);
+window.addEventListener('touchend', onPointerUp);
+
+function onPointerUp() {
+  if (draggingSource) { draggingSource = null; canvas.style.cursor = 'default'; }
+}
+
+// ============================================================
+//  UI CONTROLLER
+// ============================================================
+function updateSourceListUI() {
+  const list = document.getElementById('sourceList');
+  if (sources.length === 0) {
+    list.innerHTML = '<div class="empty-state">暂无音源<br>上传音频或点击预设添加</div>';
+    updateCanvasHint();
+    return;
+  }
+
+  list.innerHTML = sources.map(s => {
+    const isAmbient = s.radius <= CENTER_SNAP_THRESHOLD;
+    const shortName = s.name.length > 10 ? s.name.slice(0, 10) + '...' : s.name;
+    return `
+    <div class="source-item" data-id="${s.id}">
+      <div class="color-dot" style="background:${s.color}"></div>
+      <div class="info">
+        <div class="name" title="${s.name}">${shortName}</div>
+        <span class="mode-badge ${isAmbient ? 'ambient' : 'spatial'}">${isAmbient ? '主环境音' : '空间音频'}</span>
+      </div>
+      <input type="range" class="volume-slider" min="0" max="100" value="${Math.round(s.volume * 100)}" data-id="${s.id}" title="音量">
+      <button class="btn-icon btn-play ${s.isPlaying ? 'playing' : ''}" data-action="play" data-id="${s.id}" title="${s.isPlaying ? '暂停' : '播放'}">${s.isPlaying ? '⏸' : '▶'}</button>
+      <button class="btn-icon btn-remove" data-action="remove" data-id="${s.id}" title="移除">✕</button>
+    </div>`;
+  }).join('');
+
+  updateCanvasHint();
+}
+
+document.getElementById('sourceList').addEventListener('click', (e) => {
+  const btn = e.target.closest('button');
+  if (!btn) return;
+  const action = btn.dataset.action;
+  const id = parseInt(btn.dataset.id);
+  if (action === 'play') toggleSource(id);
+  if (action === 'remove') removeSource(id);
+});
+
+document.getElementById('sourceList').addEventListener('input', (e) => {
+  if (e.target.classList.contains('volume-slider')) {
+    const id = parseInt(e.target.dataset.id);
+    const source = sources.find(s => s.id === id);
+    if (source) source.setVolume(e.target.value / 100);
+  }
+});
+
+// Upload
+const uploadArea = document.getElementById('uploadArea');
+const fileInput = document.getElementById('fileInput');
+
+uploadArea.addEventListener('click', () => fileInput.click());
+fileInput.addEventListener('change', handleFileSelect);
+uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.classList.add('drag-over'); });
+uploadArea.addEventListener('dragleave', () => { uploadArea.classList.remove('drag-over'); });
+uploadArea.addEventListener('drop', (e) => {
+  e.preventDefault();
+  uploadArea.classList.remove('drag-over');
+  handleFiles(e.dataTransfer.files);
+});
+
+async function handleFileSelect(e) { handleFiles(e.target.files); fileInput.value = ''; }
+
+async function handleFiles(files) {
+  if (!audioInitialized) await initAudio();
+  for (const file of files) {
+    if (!file.type.startsWith('audio/')) continue;
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+      addSource(file.name.replace(/\.[^/.]+$/, ''), audioBuffer);
+    } catch (err) { console.error('Failed to load audio:', file.name, err); }
+  }
+}
+
+// Presets
+document.getElementById('presetGrid').addEventListener('click', async (e) => {
+  const btn = e.target.closest('.preset-btn');
+  if (!btn || btn.classList.contains('loading')) return;
+  const presetNames = { rain: '雨声', wind: '风声', fire: '篝火', ocean: '海浪', stream: '溪流', night: '夏夜' };
+  btn.classList.add('loading');
+  try {
+    if (!audioInitialized) await initAudio();
+    const buffer = await generatePreset(btn.dataset.preset);
+    if (buffer) addSource(presetNames[btn.dataset.preset] || btn.dataset.preset, buffer);
+  } catch (err) { console.error('Failed to generate preset:', err); }
+  btn.classList.remove('loading');
+});
+
+// Master buttons
+document.getElementById('btnStopAll').addEventListener('click', stopAll);
+document.getElementById('btnResetAll').addEventListener('click', resetAllPositions);
+
+// ============================================================
+//  INITIALIZATION
+// ============================================================
+animateLoop();
+updateCanvasHint();
+
+['click', 'touchstart', 'keydown'].forEach(evt => {
+  document.addEventListener(evt, () => { if (!audioInitialized) initAudio().catch(() => {}); }, { once: false });
+});
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+});
+
+console.log('🔊 声音阵 · Sound Array 已就绪');
+console.log('  拖拽音源点 → 空间定位 | 拖至圆心 → 环境音模式');
+console.log('  上传音频文件或点击预设开始体验');
+})();
+</script>
+
+</body>
+</html>
